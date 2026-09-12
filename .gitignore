@@ -1,6 +1,5 @@
-# dependencies & builds
+# dependencies & builds (dist/ IS committed — Deno Deploy serves it directly)
 node_modules/
-dist/
 
 # runtime data (accounts, sessions, tickets — never commit)
 server/data.json

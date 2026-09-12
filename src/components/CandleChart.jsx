@@ -50,7 +50,7 @@ const CandleChart = forwardRef(function CandleChart(
     const main = createChart(mainRef.current, chartOpts(theme, h));
     const c = THEMES[theme] || THEMES.dark;
     const candlesS = main.addCandlestickSeries({
-      upColor: "#2dd4a7", downColor: "#ff5d73", wickUpColor: "#2dd4a7", wickDownColor: "#ff5d73", borderVisible: false,
+      upColor: "#1FBF65", downColor: "#F2555B", wickUpColor: "#1FBF65", wickDownColor: "#F2555B", borderVisible: false,
     });
     const volS = main.addHistogramSeries({ priceFormat: { type: "volume" }, priceScaleId: "vol" });
     main.priceScale("vol").applyOptions({ scaleMargins: { top: 0.84, bottom: 0 } });
@@ -88,7 +88,7 @@ const CandleChart = forwardRef(function CandleChart(
     const chart = createChart(rsiRef.current, { ...chartOpts(theme, 110), timeScale: { ...chartOpts(theme, 110).timeScale } });
     const line = chart.addLineSeries({ color: "#c084fc", lineWidth: 1.6, priceLineVisible: false, lastValueVisible: true });
     line.createPriceLine({ price: 70, color: "rgba(255,93,115,.5)", lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: false, title: "" });
-    line.createPriceLine({ price: 30, color: "rgba(45,212,167,.5)", lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: false, title: "" });
+    line.createPriceLine({ price: 30, color: "rgba(184,242,41,.5)", lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: false, title: "" });
     chart.priceScale("right").applyOptions({ autoScale: false });
     line.applyOptions({ autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) });
     R.current.rsi = { chart, line };
@@ -131,7 +131,7 @@ const CandleChart = forwardRef(function CandleChart(
     const t = (x) => Math.floor(x.t / 1000);
     r.candlesS.setData(candles.map((c) => ({ time: t(c), open: c.o, high: c.h, low: c.l, close: c.c })));
     if (indicators.volume !== false) {
-      r.volS.setData(candles.map((c) => ({ time: t(c), value: c.v, color: c.c >= c.o ? "rgba(45,212,167,.28)" : "rgba(255,93,115,.28)" })));
+      r.volS.setData(candles.map((c) => ({ time: t(c), value: c.v, color: c.c >= c.o ? "rgba(184,242,41,.28)" : "rgba(255,93,115,.28)" })));
     } else r.volS.setData([]);
     r.ema20S.setData(indicators.ema20 ? emaSeries(candles, 20) : []);
     r.ema50S.setData(indicators.ema50 ? emaSeries(candles, 50) : []);
@@ -140,7 +140,7 @@ const CandleChart = forwardRef(function CandleChart(
       const m = indicators.macd ? macdSeries(candles) : [];
       r.macd.macdL.setData(m.map((x) => ({ time: x.time, value: x.macd })));
       r.macd.sigL.setData(m.map((x) => ({ time: x.time, value: x.signal })));
-      r.macd.hist.setData(m.map((x) => ({ time: x.time, value: x.hist, color: x.hist >= 0 ? "rgba(45,212,167,.55)" : "rgba(255,93,115,.55)" })));
+      r.macd.hist.setData(m.map((x) => ({ time: x.time, value: x.hist, color: x.hist >= 0 ? "rgba(184,242,41,.55)" : "rgba(255,93,115,.55)" })));
     }
   }, [candles, indicators]);
 

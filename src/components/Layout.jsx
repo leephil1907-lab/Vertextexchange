@@ -11,9 +11,9 @@ export function Logo({ size = 30 }) {
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
       <motion.path d="M4.5 6L16 26L27.5 6" stroke="url(#vg)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
         initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, ease: "easeInOut" }} />
-      <motion.circle cx="27.5" cy="6" r="3.4" fill="#2dd4a7" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.7, type: "spring", stiffness: 300 }} />
+      <motion.circle cx="27.5" cy="6" r="3.4" fill="#B8F229" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.7, type: "spring", stiffness: 300 }} />
       <circle cx="4.5" cy="6" r="2" fill="#4f8cff" />
-      <defs><linearGradient id="vg" x1="4" y1="26" x2="28" y2="6"><stop stopColor="#2dd4a7" /><stop offset="1" stopColor="#4f8cff" /></linearGradient></defs>
+      <defs><linearGradient id="vg" x1="4" y1="26" x2="28" y2="6"><stop stopColor="#B8F229" /><stop offset="1" stopColor="#4f8cff" /></linearGradient></defs>
     </svg>
   );
 }

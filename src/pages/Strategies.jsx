@@ -119,7 +119,7 @@ export default function Strategies() {
               <div className="guide-step">
                 <div>
                   <motion.button onClick={() => toggle(i)} className="guide-num" whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
-                    style={{ cursor: "pointer", border: "none", background: done.includes(i) ? "linear-gradient(135deg,#0d9e77,#2dd4a7)" : undefined, position: "relative" }}>
+                    style={{ cursor: "pointer", border: "none", background: done.includes(i) ? "linear-gradient(135deg,#7CBF0F,#B8F229)" : undefined, position: "relative" }}>
                     {done.includes(i) ? "✓" : i + 1}
                   </motion.button>
                   <div style={{ fontSize: 11.5, color: "var(--faint)", textAlign: "center", marginTop: 6, width: 54 }}>{done.includes(i) ? "done" : "step " + (i + 1)}</div>

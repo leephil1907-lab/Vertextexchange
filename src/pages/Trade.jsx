@@ -129,7 +129,7 @@ export default function Trade() {
   const priceLines = useMemo(() => {
     if (!paper.state) return [];
     return [
-      ...paper.state.orders.filter((o) => o.coinId === coinId).map((o) => ({ price: o.price, color: o.side === "buy" ? "#2dd4a7" : "#ff5d73", title: `${o.side} ${fmtN(o.qty, 4)}` })),
+      ...paper.state.orders.filter((o) => o.coinId === coinId).map((o) => ({ price: o.price, color: o.side === "buy" ? "#1FBF65" : "#F2555B", title: `${o.side} ${fmtN(o.qty, 4)}` })),
       ...paper.state.alerts.filter((a) => a.coinId === coinId).map((a) => ({ price: a.price, color: "#f5b840", style: "dotted", title: `🔔 ${a.dir}` })),
     ];
   }, [coinId, paper.state?.orders, paper.state?.alerts, force]);

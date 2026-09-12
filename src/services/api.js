@@ -1,5 +1,8 @@
-/* API client for the Vertex backend (auth, KYC, support, settings). */
+/* API client for the Vertex backend (auth, KYC, support, settings).
+   VITE_API_URL (build-time) points the frontend at a remotely hosted API;
+   empty = same-origin (single-server / dev-proxy setups). */
 const TOKEN_KEY = "vt_token";
+const BASE = (import.meta.env && import.meta.env.VITE_API_URL) || "";
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (t) => (t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY));
@@ -10,7 +13,7 @@ async function call(path, { method = "GET", body, auth = true } = {}) {
     const t = getToken();
     if (t) headers.Authorization = "Bearer " + t;
   }
-  const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const res = await fetch(BASE + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
   let data = null;
   try { data = await res.json(); } catch (e) { /* empty */ }
   if (!res.ok) {

@@ -29,7 +29,7 @@ export function Signup() {
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
   const strength = pwStrength(form.pw);
-  const colors = ["#e0455c", "#e0455c", "#f5b840", "#f5b840", "#2dd4a7"];
+  const colors = ["#e0455c", "#e0455c", "#f5b840", "#f5b840", "#B8F229"];
 
   const submit = async (e) => {
     e.preventDefault();

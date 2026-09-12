@@ -160,10 +160,10 @@ function brandEmail(title, bodyText, opts = {}) {
   const paras = String(bodyText || "").split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
     .map((p) => `<p style="margin:0 0 14px;font-size:15px;line-height:1.65;color:#c7d2e4;font-family:Arial,Helvetica,sans-serif;">${esc(p).replace(/\n/g, "<br/>")}</p>`).join("");
   const cta = opts.ctaUrl && opts.ctaLabel ? `
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 18px;"><tr><td style="border-radius:10px;background:#0d9e77;">
-      <a href="${esc(opts.ctaUrl)}" style="display:inline-block;padding:12px 26px;border-radius:10px;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${esc(opts.ctaLabel)}</a>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 18px;"><tr><td style="border-radius:10px;background:#B8F229;">
+      <a href="${esc(opts.ctaUrl)}" style="display:inline-block;padding:12px 26px;border-radius:10px;color:#0B0D12;font-size:14px;font-weight:bold;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${esc(opts.ctaLabel)}</a>
     </td></tr></table>` : "";
-  const link = (label, href) => `<a href="${esc(href)}" style="color:#2dd4a7;text-decoration:none;font-size:12px;font-family:Arial,Helvetica,sans-serif;">${esc(label)}</a>`;
+  const link = (label, href) => `<a href="${esc(href)}" style="color:#B8F229;text-decoration:none;font-size:12px;font-family:Arial,Helvetica,sans-serif;">${esc(label)}</a>`;
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#070b14;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#070b14;padding:28px 12px;">
 <tr><td align="center">
@@ -171,13 +171,13 @@ function brandEmail(title, bodyText, opts = {}) {
     <tr><td style="background:#0d1526;border-bottom:1px solid #1d2b47;padding:20px 28px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:bold;color:#ffffff;letter-spacing:.2px;">
-          <span style="color:#2dd4a7;">&#9650;</span>&nbsp;VERTEX<span style="color:#4f8cff;">TRADER</span>
+          <span style="color:#B8F229;">&#9650;</span>&nbsp;VERTEX<span style="color:#4f8cff;">TRADER</span>
         </td>
         <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7a94;letter-spacing:.08em;text-transform:uppercase;">Live market data · virtual funds</td>
       </tr></table>
     </td></tr>
     <tr><td style="padding:8px 28px 0;">
-      <div style="height:3px;border-radius:2px;background:#2dd4a7;"></div>
+      <div style="height:3px;border-radius:2px;background:#B8F229;"></div>
     </td></tr>
     <tr><td style="padding:26px 28px 8px;">
       <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${esc(title)}</h1>
@@ -234,12 +234,17 @@ const app = express();
 app.set("trust proxy", true);
 app.use(express.json({ limit: "14mb" }));
 
-/* ---------- security headers ---------- */
+/* ---------- security headers + CORS ---------- */
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  res.setHeader("Access-Control-Allow-Origin", CORS_ORIGIN);
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,PUT,DELETE,OPTIONS");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
 

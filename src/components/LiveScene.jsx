@@ -70,7 +70,7 @@ export default function LiveScene() {
       /* aurora ribbons */
       ctx.globalCompositeOperation = "lighter";
       const ribbons = [
-        ["rgba(45,212,167,", 0.16, 26, 0.9],
+        ["rgba(184,242,41,", 0.16, 26, 0.9],
         ["rgba(79,140,255,", 0.24, 34, 0.7],
         ["rgba(140,90,255,", 0.1, 20, 0.5],
       ];
@@ -89,9 +89,9 @@ export default function LiveScene() {
       /* horizon */
       const y0 = H * 0.8;
       const glow = ctx.createLinearGradient(0, y0 - 40, 0, y0 + 40);
-      glow.addColorStop(0, "rgba(45,212,167,0)");
-      glow.addColorStop(0.5, "rgba(45,212,167,0.14)");
-      glow.addColorStop(1, "rgba(45,212,167,0)");
+      glow.addColorStop(0, "rgba(184,242,41,0)");
+      glow.addColorStop(0.5, "rgba(184,242,41,0.14)");
+      glow.addColorStop(1, "rgba(184,242,41,0)");
       ctx.fillStyle = glow;
       ctx.fillRect(0, y0 - 40, W, 80);
 
@@ -104,7 +104,7 @@ export default function LiveScene() {
         const bh = b.cur * H * 0.62 * breathe;
         const bw = Math.max(8, slot * 0.42);
         const x = slot * i + slot / 2;
-        const col = b.up ? "#2dd4a7" : "#ff5d73";
+        const col = b.up ? "#1FBF65" : "#F2555B";
         /* wick */
         ctx.strokeStyle = col;
         ctx.globalAlpha = 0.75;

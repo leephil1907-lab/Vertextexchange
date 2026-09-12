@@ -11,7 +11,7 @@ const FIAT_KEY = "vt_fiat_v1";
 const MODE_KEY = "vt_session_mode_v1";
 
 export function AppProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || "light");
+  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || "dark");
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [fiat, setFiatState] = useState(() => localStorage.getItem(FIAT_KEY) || "EUR");
