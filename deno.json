@@ -1,6 +1,4 @@
 {
-  "name": "vertex-trader",
-  "version": "3.1.0",
   "tasks": {
     "start": "deno run --allow-read --allow-net main.ts"
   },
