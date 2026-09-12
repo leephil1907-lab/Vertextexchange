@@ -233,10 +233,10 @@ export default function Funding() {
                               <b className="pm-sym">{m.symbol}</b>
                               <span className="pm-net">{m.network}</span>
                             </div>
-                            <code className="pm-addr">{m.address}</code>
+                            <code className="pm-addr">{m.kind === "bank" ? `${m.bankName} · ${m.accountName} · ${m.accountNumber}` : m.address}</code>
                             <div className="pm-foot">
                               {m.note && <small>{m.note}</small>}
-                              <CopyBtn text={m.address} />
+                              <CopyBtn text={m.kind === "bank" ? m.accountNumber : m.address} />
                             </div>
                           </button>
                         ))}
@@ -245,8 +245,8 @@ export default function Funding() {
                       {method && (
                         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="pm-selected">
                           <div>
-                            <div className="pm-sel-label">Send to ({method.symbol} · {method.network})</div>
-                            <div className="pm-sel-addr"><code>{method.address}</code><CopyBtn text={method.address} /></div>
+                            <div className="pm-sel-label">{method.kind === "bank" ? `Transfer to (${method.symbol})` : `Send to (${method.symbol} · ${method.network})`}</div>
+                            <div className="pm-sel-addr"><code>{method.kind === "bank" ? `${method.bankName} — ${method.accountName} — ${method.accountNumber}` : method.address}</code><CopyBtn text={method.kind === "bank" ? method.accountNumber : method.address} /></div>
                           </div>
                           <div className="grid-2" style={{ gap: 14, marginTop: 16 }}>
                             <div className="field">
@@ -265,7 +265,9 @@ export default function Funding() {
                             {busy ? "Submitting…" : `Submit deposit for verification${amt ? ` · ${amt} ${method.symbol}` : ""}`}
                           </motion.button>
                           <p style={{ color: "var(--faint)", fontSize: 12, marginTop: 10, textAlign: "center" }}>
-                            Send exactly on the <b>{method.network}</b> network. Your deposit is credited to your live wallet after admin verification — status updates appear here and by email.
+                            {method.kind === "bank"
+                              ? <>Include your reference where the bank allows it. Your deposit is credited to your live wallet after admin verification — status updates appear here and by email.</>
+                              : <>Send exactly on the <b>{method.network}</b> network. Your deposit is credited to your live wallet after admin verification — status updates appear here and by email.</>}
                           </p>
                         </motion.div>
                       )}

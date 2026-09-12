@@ -238,6 +238,11 @@ function PaymentMethods() {
 
       {edit && (
         <form onSubmit={submit} style={{ marginTop: 14, borderTop: "1px solid var(--line)", paddingTop: 14 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            {[["crypto", "🪙 Crypto wallet"], ["bank", "🏦 Bank transfer"]].map(([k, l]) => (
+              <button key={k} type="button" className={"chip-toggle" + (form.kind === k ? " active" : "")} onClick={() => setForm((f) => ({ ...f, kind: k }))}>{l}</button>
+            ))}
+          </div>
           <div className="grid-2" style={{ gap: 12 }}>
             <label style={{ fontSize: 12.5, color: "var(--muted)" }}>Asset
               <select style={{ ...inp, marginTop: 4 }} value={form.asset} onChange={(e) => {
