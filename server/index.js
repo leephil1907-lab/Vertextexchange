@@ -160,10 +160,10 @@ function brandEmail(title, bodyText, opts = {}) {
   const paras = String(bodyText || "").split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
     .map((p) => `<p style="margin:0 0 14px;font-size:15px;line-height:1.65;color:#c7d2e4;font-family:Arial,Helvetica,sans-serif;">${esc(p).replace(/\n/g, "<br/>")}</p>`).join("");
   const cta = opts.ctaUrl && opts.ctaLabel ? `
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 18px;"><tr><td style="border-radius:10px;background:#B8F229;">
-      <a href="${esc(opts.ctaUrl)}" style="display:inline-block;padding:12px 26px;border-radius:10px;color:#0B0D12;font-size:14px;font-weight:bold;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${esc(opts.ctaLabel)}</a>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 18px;"><tr><td style="border-radius:10px;background:#00BFAE;">
+      <a href="${esc(opts.ctaUrl)}" style="display:inline-block;padding:12px 26px;border-radius:10px;color:#06283f;font-size:14px;font-weight:bold;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${esc(opts.ctaLabel)}</a>
     </td></tr></table>` : "";
-  const link = (label, href) => `<a href="${esc(href)}" style="color:#B8F229;text-decoration:none;font-size:12px;font-family:Arial,Helvetica,sans-serif;">${esc(label)}</a>`;
+  const link = (label, href) => `<a href="${esc(href)}" style="color:#43DDE6;text-decoration:none;font-size:12px;font-family:Arial,Helvetica,sans-serif;">${esc(label)}</a>`;
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#070b14;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#070b14;padding:28px 12px;">
 <tr><td align="center">
@@ -171,13 +171,13 @@ function brandEmail(title, bodyText, opts = {}) {
     <tr><td style="background:#0d1526;border-bottom:1px solid #1d2b47;padding:20px 28px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:bold;color:#ffffff;letter-spacing:.2px;">
-          <span style="color:#B8F229;">&#9650;</span>&nbsp;VERTEX<span style="color:#4f8cff;">TRADER</span>
+          <span style="color:#43DDE6;">&#9650;</span>&nbsp;VERTEX<span style="color:#4f8cff;">TRADER</span>
         </td>
-        <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7a94;letter-spacing:.08em;text-transform:uppercase;">Live market data · virtual funds</td>
+        <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7a94;letter-spacing:.08em;text-transform:uppercase;">Live market data · crypto funding</td>
       </tr></table>
     </td></tr>
     <tr><td style="padding:8px 28px 0;">
-      <div style="height:3px;border-radius:2px;background:#B8F229;"></div>
+      <div style="height:3px;border-radius:2px;background:#00BFAE;"></div>
     </td></tr>
     <tr><td style="padding:26px 28px 8px;">
       <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${esc(title)}</h1>
@@ -187,7 +187,7 @@ function brandEmail(title, bodyText, opts = {}) {
     <tr><td style="padding:0 28px 26px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;background:#0d1526;border:1px solid #1d2b47;">
         <tr><td style="padding:14px 18px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#8fa0ba;">
-          <b style="color:#c7d2e4;">Risk warning:</b> cryptocurrency trading involves substantial risk; leveraged products can liquidate your margin. Vertex Trader is a paper-trading platform — all trading uses virtual funds, no real assets are held and nothing here is financial advice.
+          <b style="color:#c7d2e4;">Risk warning:</b> cryptocurrency trading involves substantial risk; leveraged products can liquidate your margin. Vertex Trader is a crypto trading platform — deposits and withdrawals are verified manually by our team, trading executes against live market prices, and nothing here is financial advice.
         </td></tr>
       </table>
     </td></tr>
@@ -195,7 +195,7 @@ function brandEmail(title, bodyText, opts = {}) {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7a94;">© 2026 Vertex Trader</td>
         <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;">
-          ${APP_URL ? link("Support", APP_URL + "/support") + '&nbsp;&nbsp;·&nbsp;&nbsp;' + link("Email preferences", APP_URL + "/dashboard?tab=notifications") + '&nbsp;&nbsp;·&nbsp;&nbsp;' + link("Terminal", APP_URL + "/trade") : "Paper-trading platform · virtual funds only"}
+          ${APP_URL ? link("Support", APP_URL + "/support") + '&nbsp;&nbsp;·&nbsp;&nbsp;' + link("Email preferences", APP_URL + "/dashboard?tab=notifications") + '&nbsp;&nbsp;·&nbsp;&nbsp;' + link("Terminal", APP_URL + "/trade") : "Crypto trading platform · funding verified manually"}
         </td>
       </tr></table>
     </td></tr>
@@ -365,7 +365,7 @@ app.post("/api/auth/signup", rateLimit("signup", 12, 10 * 60e3), (req, res) => {
   const token = newToken();
   db.sessions[token] = { userId: u.id, createdAt: Date.now() };
   logLogin(u, true, req.ip);
-  notify(u, "security", "Welcome to Vertex Trader", "Your account was created successfully. Your paper wallet starts with 50,000 " + u.currency + " in virtual funds. Enable two-factor authentication from Dashboard → Security.");
+  notify(u, "security", "Welcome to Vertex Trader", "Your account was created successfully. The terminal's demo mode starts with 50,000 " + u.currency + " in virtual funds so you can practise; live trading uses your verified crypto balance. Enable two-factor authentication from Dashboard → Security.");
   save();
   res.json({ token, user: publicUser(u) });
 });

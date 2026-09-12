@@ -116,14 +116,14 @@ function ComposerPreview({ subject, body, ctaLabel }) {
     <div style={{ background: "#070b14", padding: "24px 14px" }}>
       <div style={{ maxWidth: 560, margin: "0 auto", borderRadius: 16, overflow: "hidden", border: "1px solid #1d2b47", background: "#0b1120" }}>
         <div style={{ background: "#0d1526", borderBottom: "1px solid #1d2b47", padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}><span style={{ color: "#B8F229" }}>▲</span> VERTEX<span style={{ color: "#4f8cff" }}>TRADER</span></span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}><span style={{ color: "#43DDE6" }}>▲</span> VERTEX<span style={{ color: "#4f8cff" }}>TRADER</span></span>
           <span style={{ fontSize: 10, color: "#6b7a94", letterSpacing: ".08em", textTransform: "uppercase" }}>Live market data · verified crypto funding</span>
         </div>
-        <div style={{ padding: "8px 24px 0" }}><div style={{ height: 3, borderRadius: 2, background: "#B8F229" }} /></div>
+        <div style={{ padding: "8px 24px 0" }}><div style={{ height: 3, borderRadius: 2, background: "#43DDE6" }} /></div>
         <div style={{ padding: "22px 24px 6px" }}>
           <h1 style={{ margin: "0 0 14px", fontSize: 21, lineHeight: 1.3, color: "#fff" }}>{subject || "Your subject line"}</h1>
           {paras}
-          {ctaLabel && <span style={{ display: "inline-block", padding: "11px 24px", borderRadius: 10, background: "#7CBF0F", color: "#fff", fontWeight: 700, fontSize: 14 }}>{ctaLabel}</span>}
+          {ctaLabel && <span style={{ display: "inline-block", padding: "11px 24px", borderRadius: 10, background: "#00BFAE", color: "#06283f", fontWeight: 700, fontSize: 14 }}>{ctaLabel}</span>}
         </div>
         <div style={{ padding: "0 24px 22px" }}>
           <div style={{ borderRadius: 12, background: "#0d1526", border: "1px solid #1d2b47", padding: "12px 16px", fontSize: 12, lineHeight: 1.6, color: "#8fa0ba" }}>
@@ -132,7 +132,7 @@ function ComposerPreview({ subject, body, ctaLabel }) {
         </div>
         <div style={{ background: "#0d1526", borderTop: "1px solid #1d2b47", padding: "14px 24px", display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6b7a94" }}>
           <span>© 2026 Vertex Trader</span>
-          <span><span style={{ color: "#B8F229" }}>Support</span> · <span style={{ color: "#B8F229" }}>Email preferences</span> · <span style={{ color: "#B8F229" }}>Terminal</span></span>
+          <span><span style={{ color: "#43DDE6" }}>Support</span> · <span style={{ color: "#43DDE6" }}>Email preferences</span> · <span style={{ color: "#43DDE6" }}>Terminal</span></span>
         </div>
       </div>
     </div>
@@ -184,7 +184,7 @@ function Tickets() {
             </div>
             <div style={{ maxHeight: 340, overflowY: "auto", marginBottom: 14 }}>
               {t.messages.map((m, i) => (
-                <div key={i} className={"msg " + m.from} style={{ margin: "0 0 10px " + (m.from === "support" ? "auto" : 0), maxWidth: "85%", padding: "10px 14px", borderRadius: 12, fontSize: 13.5, lineHeight: 1.55, background: m.from === "support" ? "rgba(184,242,41,.12)" : "var(--bg-elev)", border: "1px solid var(--line)", color: "var(--text)", textAlign: "left" }}>
+                <div key={i} className={"msg " + m.from} style={{ margin: "0 0 10px " + (m.from === "support" ? "auto" : 0), maxWidth: "85%", padding: "10px 14px", borderRadius: 12, fontSize: 13.5, lineHeight: 1.55, background: m.from === "support" ? "rgba(0,191,174,.12)" : "var(--bg-elev)", border: "1px solid var(--line)", color: "var(--text)", textAlign: "left" }}>
                   <small style={{ display: "block", color: "var(--faint)", fontSize: 10.5, marginBottom: 4, textTransform: "uppercase", letterSpacing: ".06em" }}>{m.from === "support" ? "Support team" : "User"} · {new Date(m.time).toLocaleString()}</small>
                   {m.text}
                 </div>

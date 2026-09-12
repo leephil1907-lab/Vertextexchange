@@ -84,7 +84,7 @@ export function PageHero({ crumb, title, text, children, img }) {
           <div className="bg-scrim" />
         </>
       )}
-      <div className="container" style={{ position: "relative", zIndex: 2 }}>
+      <div className={"container" + (img ? " on-media" : "")} style={{ position: "relative", zIndex: 2 }}>
         <motion.div className="crumbs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
           <Link to="/">Home</Link> / {crumb}
         </motion.div>
@@ -173,7 +173,7 @@ export function CtaBand({ title, text, children, img }) {
           <div className="bg-scrim" style={{ background: "linear-gradient(100deg, rgba(6,10,20,.93), rgba(6,10,20,.72))" }} />
         </>
       )}
-      <div style={{ position: "relative", zIndex: 2 }}>
+      <div className={img ? "on-media" : ""} style={{ position: "relative", zIndex: 2 }}>
         <h2>{title}</h2>
         <p>{text}</p>
         <div className="hero-actions" style={{ justifyContent: "center" }}>{children}</div>

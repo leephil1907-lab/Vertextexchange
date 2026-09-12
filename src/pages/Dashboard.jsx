@@ -31,8 +31,8 @@ function PnlChart({ points, up }) {
       autoSize: true,
     });
     const s = c.addAreaSeries({
-      lineColor: up ? "#B8F229" : "#F2555B", lineWidth: 2,
-      topColor: up ? "rgba(184,242,41,.25)" : "rgba(255,93,115,.25)", bottomColor: "rgba(184,242,41,0)",
+      lineColor: up ? "#0ca678" : "#e5484d", lineWidth: 2,
+      topColor: up ? "rgba(12,166,120,.22)" : "rgba(229,72,77,.22)", bottomColor: "rgba(12,166,120,0)",
     });
     s.setData(points);
     chart.current = c; series.current = s;
@@ -41,7 +41,7 @@ function PnlChart({ points, up }) {
   useEffect(() => {
     if (series.current && points.length) {
       series.current.setData(points);
-      series.current.applyOptions({ lineColor: up ? "#B8F229" : "#F2555B", topColor: up ? "rgba(184,242,41,.25)" : "rgba(255,93,115,.25)" });
+      series.current.applyOptions({ lineColor: up ? "#0ca678" : "#e5484d", topColor: up ? "rgba(12,166,120,.22)" : "rgba(229,72,77,.22)" });
     }
   }, [points, up]);
   return <div ref={ref} style={{ height: 300, width: "100%" }} />;

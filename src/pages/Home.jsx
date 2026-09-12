@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Reveal, Btn, Section, SectionHead, CtaBand, Counter } from "../components/ui.jsx";
+import { Reveal, Btn, Section, SectionHead, Counter } from "../components/ui.jsx";
 import { useApp } from "../app-context.jsx";
 import { getGlobal, getMarkets, CURRENCIES, fmtMoney, priceStore } from "../services/coingecko.js";
 import Sparkline from "../components/Sparkline.jsx";
@@ -9,7 +9,7 @@ import LiveScene from "../components/LiveScene.jsx";
 
 const MARQUEE = [
   "⚡ Spot & futures trading", "📈 RSI · MACD · EMA panes", "🤖 Automated DCA bots", "🔔 Live price alerts",
-  "🛡️ scrypt + TOTP 2FA security", "🪪 Automated KYC validation", "💶 EUR · USD · GBP · NGN wallets",
+  "🛡️ scrypt + TOTP 2FA security", "🪪 Automated KYC validation", "💶 EUR · USD · GBP · NGN display",
   "📡 Live CoinGecko market data", "🎫 Conversation-style support", "✉️ Branded email notifications", "↓↑ Crypto deposits & withdrawals",
 ];
 
@@ -18,6 +18,28 @@ const GUIDE_STEPS = [
   { h: "Verify (optional)", p: "Automated KYC with document upload and explicit validation reasons — or skip it and trade anyway." },
   { h: "Study your market", p: "Live top-100 coins with real stats and full analysis pages: candles, supply, ATH/ATL, indicators." },
   { h: "Trade on live prices", p: "Spot, futures with real liquidation math, DCA bots — every fill executed at genuine live CoinGecko prices." },
+];
+
+const FEATURES = [
+  { icon: "📡", t: "Live market data", d: "Top-100 coins from CoinGecko's public API — real prices, 24h stats and 7-day sparklines in EUR, USD, GBP or NGN, refreshed continuously." },
+  { icon: "⚡", t: "Spot & 50x futures", d: "Market and limit orders with instant fills, isolated margin with real liquidation math, DCA bots and alerts that fire on live prices." },
+  { icon: "🛡️", t: "Security that's on", d: "scrypt-hashed passwords, TOTP two-factor auth, automated KYC validation, login history — plus data export and account deletion." },
+  { icon: "💶", t: "Crypto funding, human checks", d: "Deposit and withdraw across 8 crypto rails. Every request is verified manually by our team before funds move — no blind auto-credits." },
+];
+
+const RAILS = [
+  ["BTC", "Bitcoin", "#f7931a"], ["ETH", "Ethereum", "#627eea"],
+  ["USDT", "Tether · ERC-20", "#26a17b"], ["USDT", "Tether · TRC-20", "#c23a4b"],
+  ["SOL", "Solana", "#9945ff"], ["TRX", "TRON", "#d63a40"],
+  ["XRP", "XRP", "#3b4a5a"], ["BNB", "BNB", "#c99a10"],
+];
+
+const SEC_ITEMS = [
+  ["scrypt-hashed passwords", "Per-user salt — never stored in plain text"],
+  ["TOTP two-factor auth", "RFC-6238, works with any authenticator app"],
+  ["Automated KYC", "Document upload with explicit validation reasons"],
+  ["Login history", "Every session recorded on your account"],
+  ["Your data, your call", "One-click export and account deletion"],
 ];
 
 /* ---------- overlapping glass stats band ---------- */
@@ -48,7 +70,6 @@ function StatsBand() {
   );
 }
 
-/* ---------- horizontal movers rail ---------- */
 /* ---------- mouse drag-to-scroll for horizontal rails ---------- */
 function useRailDrag() {
   const st = useRef(null);
@@ -111,7 +132,7 @@ function MoversRail() {
   );
 }
 
-/* ---------- designed terminal mock for the bento ---------- */
+/* ---------- designed terminal mock ---------- */
 function TermMock() {
   const { fiat } = useApp();
   const px = priceStore.price("bitcoin");
@@ -136,8 +157,223 @@ function TermMock() {
   );
 }
 
+/* ================= animated hero carousel ================= */
+const EASE = [0.21, 0.65, 0.36, 1];
+const slideV = (reduced) => ({
+  enter: (d) => ({ opacity: 0, x: reduced ? 0 : d * 72 }),
+  center: { opacity: 1, x: 0, transition: { duration: 0.5, ease: EASE, staggerChildren: 0.07, delayChildren: 0.12 } },
+  exit: (d) => ({ opacity: 0, x: reduced ? 0 : -d * 72, transition: { duration: 0.32, ease: "easeIn" } }),
+});
+const itemV = (reduced) => ({
+  enter: { opacity: 0, y: reduced ? 0 : 26 },
+  center: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+  exit: { opacity: 0 },
+});
+
+function HeroCarousel({ user, fiat, pills }) {
+  const reduced = useReducedMotion();
+  const [[idx, dir], setNav] = useState([0, 1]);
+  const [paused, setPaused] = useState(false);
+  const tx = useRef(null);
+  const N = 4;
+
+  const go = useCallback((d) => setNav(([i]) => [(i + d + N) % N, d]), []);
+  const goTo = useCallback((j) => setNav(([i]) => [j, j > i ? 1 : -1]), []);
+
+  useEffect(() => {
+    if (paused || reduced) return undefined;
+    const t = setInterval(() => go(1), 6000);
+    return () => clearInterval(t);
+  }, [idx, paused, reduced, go]);
+
+  const onTouchStart = (e) => { tx.current = e.touches[0].clientX; };
+  const onTouchEnd = (e) => {
+    if (tx.current == null) return;
+    const dx = e.changedTouches[0].clientX - tx.current;
+    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+    tx.current = null;
+  };
+  const onKeyDown = (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
+  };
+
+  const sv = slideV(reduced);
+  const iv = itemV(reduced);
+
+  const slides = [
+    {
+      key: "live",
+      kicker: <><span className="pulse-dot" /> Live CoinGecko prices · crypto funding</>,
+      h1: <>Trade the real market.<br /><span className="grad-text">Fund · Trade · Withdraw.</span></>,
+      lead: "Spot, 50x futures with real liquidation math, DCA bots, RSI/MACD charting and live alerts — every fill executed at genuine live prices. Deposit crypto, trade, withdraw to your own wallet.",
+      ctas: <>
+        <Btn to="/trade" className="btn btn-primary btn-lg">🚀 Launch Terminal</Btn>
+        {user
+          ? <Btn to="/dashboard" className="btn btn-ghost btn-lg">My Dashboard</Btn>
+          : <Btn to="/signup" className="btn btn-ghost btn-lg">Create Free Account</Btn>}
+      </>,
+      pills: true,
+      visual: (
+        <div className="hc-visual grad-ring">
+          <LiveScene />
+          <div className="hero-live-card">
+            <div className="hlc-head"><span className="pulse-dot" /> Living image · real prices</div>
+            {pills.map((p) => (
+              <div className="hlc-row" key={p.sym}>
+                <span className="hlc-sym">{p.sym}/{fiat}</span>
+                <span className="hlc-px tnum">{p.px}</span>
+                <span className={"hlc-chg tnum " + (p.chg >= 0 ? "up" : "down")}>{p.chg >= 0 ? "▲" : "▼"} {Math.abs(p.chg).toFixed(2)}%</span>
+              </div>
+            ))}
+            <div className="hlc-foot">Scene animates with live 24h moves</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "terminal",
+      kicker: <>🖥️ Pro terminal</>,
+      h1: <>Everything a pro terminal needs.<br /><span className="grad-text">Nothing it doesn't.</span></>,
+      lead: "Market & limit orders with instant fills, resting orders plotted on the chart, live depth, six timeframes with RSI, MACD and EMA overlays — plus price alerts that actually fire.",
+      ctas: <>
+        <Btn to="/trade" className="btn btn-primary btn-lg">Open the Terminal</Btn>
+        <Btn to="/markets" className="btn btn-ghost btn-lg">Browse Markets</Btn>
+      </>,
+      visual: (
+        <div className="hc-visual" style={{ display: "flex", flexDirection: "column", border: "1px solid var(--line)", background: "var(--bg-elev)", padding: 16 }}>
+          <TermMock />
+        </div>
+      ),
+    },
+    {
+      key: "funding",
+      kicker: <>↓↑ Crypto funding</>,
+      h1: <>Deposit crypto.<br /><span className="grad-text">Verified by humans.</span></>,
+      lead: "Eight crypto rails to fund your wallet. Every deposit and withdrawal is checked manually by our team before funds move — no blind auto-credits, no mystery holds.",
+      ctas: <>
+        {user
+          ? <Btn to="/funding" className="btn btn-primary btn-lg">Go to Funding</Btn>
+          : <Btn to="/signup" className="btn btn-primary btn-lg">Create Free Account</Btn>}
+        <Btn to="/fees" className="btn btn-ghost btn-lg">See Fees</Btn>
+      </>,
+      visual: (
+        <div>
+          <div className="fund-grid">
+            {RAILS.map(([sym, name, color], i) => (
+              <motion.div className="fund-chip" key={sym + name} variants={iv} custom={i}>
+                <span className="fc-badge" style={{ background: color }}>{sym.slice(0, 4)}</span>
+                <span><b>{name}</b><small>{sym}</small></span>
+              </motion.div>
+            ))}
+          </div>
+          <div className="hc-note">🛡️ <span>Deposits &amp; withdrawals verified manually — balances update only after approval.</span></div>
+        </div>
+      ),
+    },
+    {
+      key: "security",
+      kicker: <>🔐 Security & account</>,
+      h1: <>Security that's<br /><span className="grad-text">actually on.</span></>,
+      lead: "Real protections you can inspect from your dashboard — not marketing stickers. Verify your identity, lock your account with 2FA, and keep full control of your data.",
+      ctas: <>
+        {user
+          ? <Btn to="/dashboard?tab=security" className="btn btn-primary btn-lg">Security Settings</Btn>
+          : <Btn to="/signup" className="btn btn-primary btn-lg">Create Free Account</Btn>}
+        <Btn to="/learn" className="btn btn-ghost btn-lg">Learn the Basics</Btn>
+      </>,
+      visual: (
+        <div className="sec-list">
+          {SEC_ITEMS.map(([t, s], i) => (
+            <motion.div className="sec-item" key={t} variants={iv} custom={i}>
+              <i>✓</i>
+              <span>{t}<small>{s}</small></span>
+            </motion.div>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
+  const s = slides[idx];
+  return (
+    <section
+      className="hero hero-carousel"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Platform highlights"
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+    >
+      <div className="blob b1" /><div className="blob b2" /><div className="blob b3" />
+      <div className="container">
+        <div
+          className={"hc-frame" + (paused ? " paused" : "")}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
+        >
+          <div className="hc-viewport" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+            <AnimatePresence initial={false} custom={dir}>
+              <motion.div
+                key={s.key}
+                className={"hc-slide s" + (idx + 1)}
+                custom={dir}
+                variants={sv}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                aria-hidden={undefined}
+              >
+                <div className="hc-copy">
+                  <motion.span className="eyebrow" variants={iv}>{s.kicker}</motion.span>
+                  <motion.h1 variants={iv}>{s.h1}</motion.h1>
+                  <motion.p className="lead" variants={iv}>{s.lead}</motion.p>
+                  <motion.div className="hero-actions" variants={iv}>{s.ctas}</motion.div>
+                  {s.pills && (
+                    <motion.div className="live-pills" variants={iv}>
+                      {pills.map((p) => (
+                        <span className="live-pill" key={p.sym}>
+                          <span className="pulse-dot" />
+                          <b>{p.sym}</b>
+                          <span className="tnum">{p.px}</span>
+                          <span className={"tnum " + (p.chg >= 0 ? "up" : "down")}>{p.chg >= 0 ? "▲" : "▼"}{Math.abs(p.chg).toFixed(2)}%</span>
+                        </span>
+                      ))}
+                    </motion.div>
+                  )}
+                </div>
+                <motion.div variants={iv} style={{ minWidth: 0, position: "relative" }}>{s.visual}</motion.div>
+              </motion.div>
+            </AnimatePresence>
+            <button className="hc-arrow prev" aria-label="Previous slide" onClick={() => go(-1)}>‹</button>
+            <button className="hc-arrow next" aria-label="Next slide" onClick={() => go(1)}>›</button>
+          </div>
+          <div className="hc-bar">
+            <div className="hc-dots">
+              {slides.map((sl, i) => (
+                <button
+                  key={sl.key}
+                  className={"hc-dot" + (i === idx ? " active" : "")}
+                  aria-label={"Go to slide " + (i + 1)}
+                  onClick={() => goTo(i)}
+                >
+                  {i === idx && <i key={"p" + idx} />}
+                </button>
+              ))}
+            </div>
+            <span className="hc-count tnum">{String(idx + 1).padStart(2, "0")} / {String(N).padStart(2, "0")}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const { user, fiat } = useApp();
+  const reduced = useReducedMotion();
   const [, force] = useState(0);
   useEffect(() => {
     getMarkets(CURRENCIES[fiat].vs, 1, 100).catch(() => { });
@@ -151,63 +387,8 @@ export default function Home() {
 
   return (
     <>
-      {/* ================= HERO ================= */}
-      <section className="hero hero-v7">
-        <div className="blob b1" /><div className="blob b2" /><div className="blob b3" />
-        <div className="container hero-grid">
-          <div>
-            <motion.span className="eyebrow" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-              <span className="pulse-dot" /> Live CoinGecko prices · crypto funding · admin-verified
-            </motion.span>
-            <motion.h1 initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}>
-              Trade the real market.<br /><span className="grad-text">Fund · Trade · Withdraw.</span>
-            </motion.h1>
-            <motion.p className="lead" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}>
-              Spot, 50x futures with real liquidation math, DCA bots, RSI/MACD charting and live alerts —
-              executing against genuine CoinGecko prices. Deposit crypto, trade live, withdraw to your own wallet;
-              every funding request is verified manually by our team.
-            </motion.p>
-            <motion.div className="hero-actions" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Btn to="/trade" className="btn btn-primary btn-lg">🚀 Launch Terminal</Btn>
-              {user
-                ? <Btn to="/dashboard" className="btn btn-ghost btn-lg">My Dashboard</Btn>
-                : <Btn to="/signup" className="btn btn-ghost btn-lg">Create Free Account</Btn>}
-            </motion.div>
-            <motion.div className="live-pills" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.34 }}>
-              {pills.map((p) => (
-                <span className="live-pill" key={p.sym}>
-                  <span className="pulse-dot" />
-                  <b>{p.sym}</b>
-                  <span className="tnum">{p.px}</span>
-                  <span className={"tnum " + (p.chg >= 0 ? "up" : "down")}>{p.chg >= 0 ? "▲" : "▼"}{Math.abs(p.chg).toFixed(2)}%</span>
-                </span>
-              ))}
-            </motion.div>
-          </div>
-          <motion.div className="hero-visual grad-ring" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15, duration: 0.6 }}>
-            <LiveScene />
-            <div className="float-chip fc-1">
-              <small>24h volume</small>
-              <b className="tnum">{priceStore.quotes.bitcoin ? fmtMoney((priceStore.quotes.bitcoin.price || 0) * 28400, fiat, true) : "…"}</b>
-            </div>
-            <div className="float-chip fc-2">
-              <small>Futures leverage</small>
-              <b className="grad-text">up to 50x</b>
-            </div>
-            <div className="hero-live-card">
-              <div className="hlc-head"><span className="pulse-dot" /> Living image · real prices</div>
-              {pills.map((p) => (
-                <div className="hlc-row" key={p.sym}>
-                  <span className="hlc-sym">{p.sym}/{fiat}</span>
-                  <span className="hlc-px tnum">{p.px}</span>
-                  <span className={"hlc-chg tnum " + (p.chg >= 0 ? "up" : "down")}>{p.chg >= 0 ? "▲" : "▼"} {Math.abs(p.chg).toFixed(2)}%</span>
-                </div>
-              ))}
-              <div className="hlc-foot">Scene animates with live 24h moves</div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* ================= HERO CAROUSEL ================= */}
+      <HeroCarousel user={user} fiat={fiat} pills={pills} />
 
       <StatsBand />
 
@@ -215,8 +396,33 @@ export default function Home() {
         <div className="marquee-track">{[...MARQUEE, ...MARQUEE].map((m, i) => <span key={i}>{m}</span>)}</div>
       </div>
 
-      {/* ================= MOVERS ================= */}
+      {/* ================= FEATURE HIGHLIGHTS ================= */}
       <Section>
+        <div className="container">
+          <SectionHead kicker="Why Vertex Trader" title="Built to be used, not just browsed"
+            text="Four things this platform does for you from day one — every one of them is live right now." />
+          <div className="feat-grid">
+            {FEATURES.map((f, i) => (
+              <motion.div
+                key={f.t}
+                className="card feat-card"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: i * 0.08, ease: EASE }}
+                whileHover={{ y: -6 }}
+              >
+                <div className="icon">{f.icon}</div>
+                <h3>{f.t}</h3>
+                <p>{f.d}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ================= MOVERS ================= */}
+      <Section alt>
         <div className="container">
           <SectionHead kicker="Live now" title="Today's biggest movers" text="Real 24h changes and 7-day sparklines from the live top-100 — tap any card for its full analysis page." />
           <MoversRail />
@@ -227,7 +433,7 @@ export default function Home() {
       </Section>
 
       {/* ================= BENTO FEATURES ================= */}
-      <Section alt>
+      <Section>
         <div className="container">
           <SectionHead kicker="The platform" title="Everything works. Nothing is decorative." text="Each tile below is a live feature of this app — open the terminal and use it in seconds." />
           <div className="bento">
@@ -286,16 +492,24 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ================= STEPS TIMELINE ================= */}
-      <Section>
+      {/* ================= HOW IT WORKS ================= */}
+      <Section alt>
         <div className="container">
           <SectionHead kicker="Getting started" title="From zero to your first trade" text="Four steps — the Strategies page tracks your progress through them." />
           <div className="timeline">
-            {GUIDE_STEPS.map((s, i) => (
-              <Reveal key={s.h} delay={i * 0.08} className="tl-item">
-                <div className="tl-node">{i + 1}</div>
-                <h3>{s.h}</h3>
-                <p>{s.p}</p>
+            {GUIDE_STEPS.map((st, i) => (
+              <Reveal key={st.h} delay={i * 0.08} className="tl-item">
+                <motion.div
+                  className="tl-node-anim"
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ type: "spring", stiffness: 240, damping: 16, delay: 0.1 + i * 0.09 }}
+                >
+                  <div className="tl-node">{i + 1}</div>
+                </motion.div>
+                <h3>{st.h}</h3>
+                <p>{st.p}</p>
               </Reveal>
             ))}
           </div>
@@ -306,7 +520,7 @@ export default function Home() {
       </Section>
 
       {/* ================= TRUST ================= */}
-      <Section alt id="trust">
+      <Section id="trust">
         <div className="container">
           <SectionHead kicker="Trust & transparency" title="Real infrastructure, honestly credited"
             text="No purchased badges, no invented certifications — every item below is a verifiable part of how this platform works." />
@@ -329,13 +543,30 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ================= FINAL CTA ================= */}
+      {/* ================= ANIMATED SIGNUP CTA ================= */}
       <Section>
         <div className="container">
-          <CtaBand img="/img/strategy-cinema.jpg" title="Your first trade is 60 seconds away" text="Open the terminal, pick a coin, trade against live prices. Create an account to fund your wallet and keep your progress.">
-            <Btn to="/trade" className="btn btn-primary btn-lg">Launch Terminal</Btn>
-            <Btn to="/markets" className="btn btn-ghost btn-lg">Browse Markets</Btn>
-          </CtaBand>
+          <Reveal className="cta-anim">
+            <motion.div className="cta-blob cb1" aria-hidden="true"
+              animate={reduced ? undefined : { y: [0, -30, 0], scale: [1, 1.14, 1] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
+            <motion.div className="cta-blob cb2" aria-hidden="true"
+              animate={reduced ? undefined : { y: [0, 26, 0], scale: [1, 1.1, 1] }}
+              transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: -3 }} />
+            <motion.div className="cta-blob cb3" aria-hidden="true"
+              animate={reduced ? undefined : { x: [0, -40, 0], y: [0, 18, 0] }}
+              transition={{ duration: 13, repeat: Infinity, ease: "easeInOut", delay: -6 }} />
+            <div className="cta-grid" aria-hidden="true" />
+            <h2>Your first trade is 60 seconds away</h2>
+            <p>Open the terminal and trade against live prices — or create a free account to fund your wallet with crypto and track everything from your dashboard.</p>
+            <div className="hero-actions" style={{ justifyContent: "center" }}>
+              <Btn to="/trade" className="btn btn-primary btn-lg">Launch Terminal</Btn>
+              {user
+                ? <Btn to="/dashboard" className="btn btn-cta-ghost btn-lg">My Dashboard</Btn>
+                : <Btn to="/signup" className="btn btn-cta-ghost btn-lg">Create Free Account</Btn>}
+            </div>
+            <div className="cta-fine">No deposit needed to explore · Demo mode available in the terminal</div>
+          </Reveal>
         </div>
       </Section>
     </>

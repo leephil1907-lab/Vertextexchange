@@ -11,9 +11,9 @@ export function Logo({ size = 30 }) {
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
       <motion.path d="M4.5 6L16 26L27.5 6" stroke="url(#vg)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
         initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, ease: "easeInOut" }} />
-      <motion.circle cx="27.5" cy="6" r="3.4" fill="#B8F229" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.7, type: "spring", stiffness: 300 }} />
-      <circle cx="4.5" cy="6" r="2" fill="#4f8cff" />
-      <defs><linearGradient id="vg" x1="4" y1="26" x2="28" y2="6"><stop stopColor="#B8F229" /><stop offset="1" stopColor="#4f8cff" /></linearGradient></defs>
+      <motion.circle cx="27.5" cy="6" r="3.4" fill="var(--accent-3)" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.7, type: "spring", stiffness: 300 }} />
+      <circle cx="4.5" cy="6" r="2" fill="var(--accent)" />
+      <defs><linearGradient id="vg" x1="4" y1="26" x2="28" y2="6"><stop stopColor="var(--accent)" /><stop offset="1" stopColor="var(--accent-2)" /></linearGradient></defs>
     </svg>
   );
 }
@@ -23,7 +23,7 @@ function Announcement() {
   const [hidden, setHidden] = useState(() => sessionStorage.getItem("vt_announce_off") === "1");
   const [cfg, setCfg] = useState(null);
   useEffect(() => { api.config?.().then((r) => setCfg(r.config?.announcement)).catch(() => { }); }, []);
-  const a = cfg || { enabled: true, text: "📡 Live market data by CoinGecko · Trading uses virtual funds (paper trading)", link: "/strategies", linkLabel: "New here? Follow the step-by-step guide →" };
+  const a = cfg || { enabled: true, text: "📡 Live market data by CoinGecko · Crypto funding verified manually by our team", link: "/strategies", linkLabel: "New here? Follow the step-by-step guide →" };
   return (
     <AnimatePresence initial={false}>
       {!hidden && a.enabled !== false && (
@@ -286,8 +286,7 @@ function Footer() {
         <div className="footer-grid">
           <div className="footer-about">
             <Link className="logo" to="/"><Logo size={28} /><span>Vertex<span className="g">Trader</span></span></Link>
-            <p>A crypto paper-trading platform with live CoinGecko market data: practise spot, futures and DCA strategies with virtual funds before ever risking real money.</p>
-            <div className="socials">{["𝕏", "in", "▶", "◎"].map((s, i) => <motion.a key={i} href="#" whileHover={{ y: -3, rotate: 4 }} onClick={(e) => e.preventDefault()}>{s}</motion.a>)}</div>
+            <p>A crypto trading platform with live CoinGecko market data: spot, futures up to 50x, DCA bots and pro charting — with crypto funding verified manually by our team, and a demo mode in the terminal to practise risk-free.</p>
           </div>
           {col("Trade", [["Live Terminal", "/trade"], ["Markets", "/markets"], ["Fee Schedule", "/fees"]])}
           {col("Learn", [["Getting Started Guide", "/strategies"], ["Strategy Library", "/strategies"], ["Courses & Glossary", "/learn"]])}
@@ -295,7 +294,7 @@ function Footer() {
           {col("Company", [["About & Risk", "/about"], ["Support & FAQ", "/support"], ["Share Feedback & Rate Us", "/support"], ["Trust & Transparency", "/#trust"]])}
         </div>
         <div className="risk-note">
-          <p><strong>Risk warning:</strong> Cryptocurrency trading involves substantial risk and leveraged products can lead to rapid losses, including liquidation of your full margin. Prices can be extremely volatile. Nothing on this site is financial advice. Practise with virtual funds first and never risk money you cannot afford to lose.</p>
+          <p><strong>Risk warning:</strong> Cryptocurrency trading involves substantial risk and leveraged products can lead to rapid losses, including liquidation of your full margin. Prices can be extremely volatile. Nothing on this site is financial advice. Use the terminal's demo mode to practise first and never risk money you cannot afford to lose.</p>
           <p><strong>Platform notice:</strong> Vertex Trader is a crypto trading platform. Market data is provided by CoinGecko's public API and may be delayed or rate-limited. Funding is crypto-only — every deposit and withdrawal is verified manually by our team before funds move. Trading involves substantial risk of loss; leveraged products can liquidate your entire margin. Nothing on this platform is financial advice.</p>
         </div>
         <div className="footer-bottom">

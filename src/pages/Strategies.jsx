@@ -119,7 +119,7 @@ export default function Strategies() {
               <div className="guide-step">
                 <div>
                   <motion.button onClick={() => toggle(i)} className="guide-num" whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
-                    style={{ cursor: "pointer", border: "none", background: done.includes(i) ? "linear-gradient(135deg,#7CBF0F,#B8F229)" : undefined, position: "relative" }}>
+                    style={{ cursor: "pointer", border: "none", background: done.includes(i) ? "linear-gradient(135deg,#0ca678,#22c98d)" : undefined, position: "relative" }}>
                     {done.includes(i) ? "✓" : i + 1}
                   </motion.button>
                   <div style={{ fontSize: 11.5, color: "var(--faint)", textAlign: "center", marginTop: 6, width: 54 }}>{done.includes(i) ? "done" : "step " + (i + 1)}</div>
@@ -166,7 +166,7 @@ export default function Strategies() {
             ))}
           </div>
           <p style={{ textAlign: "center", color: "var(--faint)", fontSize: 12.5, marginTop: 26 }}>
-            Educational content only — not financial advice. Every strategy can lose money in real markets; that's precisely why you're practising with virtual funds.
+            Educational content only — not financial advice. Every strategy can lose money in real markets; that's precisely why the terminal includes a demo mode to practise in first.
           </p>
         </div>
       </Section>

@@ -5,7 +5,7 @@ import { createChart, CrosshairMode, LineStyle } from "lightweight-charts";
 import { emaSeries, rsiSeries, macdSeries } from "../engine/indicators.js";
 
 const THEMES = {
-  dark: { text: "#8fa1c2", grid: "rgba(79,140,255,.07)", border: "rgba(79,140,255,.22)", labelBg: "#16223c" },
+  dark: { text: "#9db0cc", grid: "rgba(109,155,255,.08)", border: "rgba(109,155,255,.22)", labelBg: "#152542" },
   light: { text: "#51607e", grid: "rgba(23,43,99,.08)", border: "rgba(23,43,99,.16)", labelBg: "#e8ecf6" },
 };
 
@@ -54,8 +54,8 @@ const CandleChart = forwardRef(function CandleChart(
     });
     const volS = main.addHistogramSeries({ priceFormat: { type: "volume" }, priceScaleId: "vol" });
     main.priceScale("vol").applyOptions({ scaleMargins: { top: 0.84, bottom: 0 } });
-    const ema20S = main.addLineSeries({ color: "#f5b840", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
-    const ema50S = main.addLineSeries({ color: "#4f8cff", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+    const ema20S = main.addLineSeries({ color: "#f59e0b", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+    const ema50S = main.addLineSeries({ color: "#3a6fe0", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
 
     R.current = { main, candlesS, volS, ema20S, ema50S, rsi: null, macd: null, lines: [] };
 
@@ -86,9 +86,9 @@ const CandleChart = forwardRef(function CandleChart(
     }
     if (R.current.rsi) return;
     const chart = createChart(rsiRef.current, { ...chartOpts(theme, 110), timeScale: { ...chartOpts(theme, 110).timeScale } });
-    const line = chart.addLineSeries({ color: "#c084fc", lineWidth: 1.6, priceLineVisible: false, lastValueVisible: true });
+    const line = chart.addLineSeries({ color: "#009e91", lineWidth: 1.6, priceLineVisible: false, lastValueVisible: true });
     line.createPriceLine({ price: 70, color: "rgba(255,93,115,.5)", lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: false, title: "" });
-    line.createPriceLine({ price: 30, color: "rgba(184,242,41,.5)", lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: false, title: "" });
+    line.createPriceLine({ price: 30, color: "rgba(31,191,101,.55)", lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: false, title: "" });
     chart.priceScale("right").applyOptions({ autoScale: false });
     line.applyOptions({ autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) });
     R.current.rsi = { chart, line };
@@ -111,8 +111,8 @@ const CandleChart = forwardRef(function CandleChart(
     if (R.current.macd) return;
     const chart = createChart(macdRef.current, chartOpts(theme, 130));
     const hist = chart.addHistogramSeries({ priceFormat: { precision: 6, minMove: 1e-8 }, priceLineVisible: false, lastValueVisible: false });
-    const macdL = chart.addLineSeries({ color: "#4f8cff", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
-    const sigL = chart.addLineSeries({ color: "#f5b840", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+    const macdL = chart.addLineSeries({ color: "#3a6fe0", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+    const sigL = chart.addLineSeries({ color: "#f59e0b", lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
     R.current.macd = { chart, hist, macdL, sigL };
     chart.timeScale().subscribeVisibleLogicalRangeChange((range) => {
       if (!range || syncing.current) return;
@@ -131,7 +131,7 @@ const CandleChart = forwardRef(function CandleChart(
     const t = (x) => Math.floor(x.t / 1000);
     r.candlesS.setData(candles.map((c) => ({ time: t(c), open: c.o, high: c.h, low: c.l, close: c.c })));
     if (indicators.volume !== false) {
-      r.volS.setData(candles.map((c) => ({ time: t(c), value: c.v, color: c.c >= c.o ? "rgba(184,242,41,.28)" : "rgba(255,93,115,.28)" })));
+      r.volS.setData(candles.map((c) => ({ time: t(c), value: c.v, color: c.c >= c.o ? "rgba(31,191,101,.3)" : "rgba(242,85,91,.3)" })));
     } else r.volS.setData([]);
     r.ema20S.setData(indicators.ema20 ? emaSeries(candles, 20) : []);
     r.ema50S.setData(indicators.ema50 ? emaSeries(candles, 50) : []);
@@ -140,7 +140,7 @@ const CandleChart = forwardRef(function CandleChart(
       const m = indicators.macd ? macdSeries(candles) : [];
       r.macd.macdL.setData(m.map((x) => ({ time: x.time, value: x.macd })));
       r.macd.sigL.setData(m.map((x) => ({ time: x.time, value: x.signal })));
-      r.macd.hist.setData(m.map((x) => ({ time: x.time, value: x.hist, color: x.hist >= 0 ? "rgba(184,242,41,.55)" : "rgba(255,93,115,.55)" })));
+      r.macd.hist.setData(m.map((x) => ({ time: x.time, value: x.hist, color: x.hist >= 0 ? "rgba(31,191,101,.55)" : "rgba(242,85,91,.55)" })));
     }
   }, [candles, indicators]);
 
@@ -151,7 +151,7 @@ const CandleChart = forwardRef(function CandleChart(
       if (!r.main) return;
       r.lines.forEach((l) => { try { r.candlesS.removePriceLine(l); } catch (e) { /* chart gone */ } });
       r.lines = (lines || []).map((l) => r.candlesS.createPriceLine({
-        price: l.price, color: l.color || "#f5b840", lineWidth: 1,
+        price: l.price, color: l.color || "#f59e0b", lineWidth: 1,
         lineStyle: l.style === "dotted" ? LineStyle.Dotted : LineStyle.Dashed,
         axisLabelVisible: true, title: l.title || "",
       }));

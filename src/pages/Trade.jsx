@@ -129,8 +129,8 @@ export default function Trade() {
   const priceLines = useMemo(() => {
     if (!paper.state) return [];
     return [
-      ...paper.state.orders.filter((o) => o.coinId === coinId).map((o) => ({ price: o.price, color: o.side === "buy" ? "#1FBF65" : "#F2555B", title: `${o.side} ${fmtN(o.qty, 4)}` })),
-      ...paper.state.alerts.filter((a) => a.coinId === coinId).map((a) => ({ price: a.price, color: "#f5b840", style: "dotted", title: `🔔 ${a.dir}` })),
+      ...paper.state.orders.filter((o) => o.coinId === coinId).map((o) => ({ price: o.price, color: o.side === "buy" ? "#0ca678" : "#e5484d", title: `${o.side} ${fmtN(o.qty, 4)}` })),
+      ...paper.state.alerts.filter((a) => a.coinId === coinId).map((a) => ({ price: a.price, color: "#f59e0b", style: "dotted", title: `🔔 ${a.dir}` })),
     ];
   }, [coinId, paper.state?.orders, paper.state?.alerts, force]);
   useEffect(() => { chartRef.current?.setPriceLines?.(priceLines); }, [priceLines]);
@@ -565,7 +565,7 @@ export default function Trade() {
                         <td className="num tnum">{st.positions.reduce((s, p) => s + p.margin + paper.uPnl(p), 0).toFixed(2)}</td>
                         <td className="num tnum">{total > 0 ? ((st.positions.reduce((s, p) => s + p.margin + paper.uPnl(p), 0) / total) * 100).toFixed(1) + "%" : "—"}</td></tr>
                     )}
-                    <tr style={{ background: "rgba(79,140,255,.06)" }}><td><b>Total equity</b></td><td className="num">—</td><td className="num tnum"><b>{total.toFixed(2)}</b></td><td className="num tnum">100%</td></tr>
+                    <tr style={{ background: "var(--bg-elev)" }}><td><b>Total equity</b></td><td className="num">—</td><td className="num tnum"><b>{total.toFixed(2)}</b></td><td className="num tnum">100%</td></tr>
                   </tbody>
                 </table>
               );

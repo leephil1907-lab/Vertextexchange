@@ -70,9 +70,9 @@ export default function LiveScene() {
       /* aurora ribbons */
       ctx.globalCompositeOperation = "lighter";
       const ribbons = [
-        ["rgba(184,242,41,", 0.16, 26, 0.9],
+        ["rgba(0,191,174,", 0.16, 26, 0.9],
         ["rgba(79,140,255,", 0.24, 34, 0.7],
-        ["rgba(140,90,255,", 0.1, 20, 0.5],
+        ["rgba(67,221,230,", 0.1, 20, 0.5],
       ];
       for (const [col, yb, amp, sp] of ribbons) {
         ctx.beginPath();

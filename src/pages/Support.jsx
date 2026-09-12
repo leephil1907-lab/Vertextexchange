@@ -138,7 +138,7 @@ export default function Support() {
                       </div>
                       <div style={{ maxHeight: 320, overflowY: "auto", marginBottom: 14 }}>
                         {(t.messages || []).map((m, i) => (
-                          <div key={i} style={{ margin: "0 0 10px " + (m.from === "support" ? "auto" : 0), maxWidth: "88%", padding: "10px 14px", borderRadius: 12, fontSize: 13.5, lineHeight: 1.55, background: m.from === "support" ? "rgba(184,242,41,.12)" : "var(--bg-elev)", border: "1px solid var(--line)", color: "var(--text)" }}>
+                          <div key={i} style={{ margin: "0 0 10px " + (m.from === "support" ? "auto" : 0), maxWidth: "88%", padding: "10px 14px", borderRadius: 12, fontSize: 13.5, lineHeight: 1.55, background: m.from === "support" ? "rgba(0,191,174,.12)" : "var(--bg-elev)", border: "1px solid var(--line)", color: "var(--text)" }}>
                             <small style={{ display: "block", color: "var(--faint)", fontSize: 10.5, marginBottom: 4, textTransform: "uppercase", letterSpacing: ".06em" }}>
                               {m.from === "support" ? " Support team" : "🙋 You"} · {new Date(m.time).toLocaleString()}
                             </small>
