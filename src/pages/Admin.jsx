@@ -252,8 +252,8 @@ function PaymentMethods() {
                 {PM_ASSETS.map(([k, s]) => <option key={k} value={k}>{s} — {k}</option>)}
               </select>
             </label>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>Network label
-              <input style={{ ...inp, marginTop: 4 }} required value={form.network} onChange={(e) => setForm((f) => ({ ...f, network: e.target.value }))} placeholder="e.g. Tron (TRC-20)" />
+            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>{form.kind === "bank" ? "Short label (shown on the funding card)" : "Network label"}
+              <input style={{ ...inp, marginTop: 4 }} required={form.kind === "crypto"} value={form.network} onChange={(e) => setForm((f) => ({ ...f, network: e.target.value }))} placeholder={form.kind === "bank" ? "e.g. Bank transfer · Nigeria" : "e.g. Tron (TRC-20)"} />
             </label>
           </div>
           {form.kind === "crypto" ? (
