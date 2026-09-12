@@ -1,0 +1,10 @@
+# Vertex Trader — crawler policy
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /funding
+Disallow: /login
+Disallow: /signup
+
+# Paper-trading education platform. Public pages: /, /markets, /coin/*, /trade, /strategies, /learn, /fees, /about, /support, /terms, /privacy
