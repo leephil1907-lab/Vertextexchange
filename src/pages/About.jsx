@@ -2,8 +2,8 @@ import { Reveal, Btn, Section, SectionHead, PageHero, CtaBand } from "../compone
 import { useApp } from "../app-context.jsx";
 
 const VALUES = [
-  { icon: "🎯", h: "Practice before you risk", p: "Most new traders lose money in their first year — usually to leverage and emotions, not bad ideas. We built the safest possible place to make those mistakes: real prices, real mechanics, virtual funds." },
-  { icon: "📊", h: "Real data, always", p: "Every quote, candle, market cap and coin profile on this site comes live from CoinGecko's public API. No simulated price feeds, no fabricated charts. The market you practise on is the market that exists." },
+  { icon: "🎯", h: "Learn without burning capital", p: "Most new traders lose money in their first year — usually to leverage and emotions, not bad ideas. The terminal's demo session gives you separate practice funds at the same live prices, so those mistakes cost nothing." },
+  { icon: "📊", h: "Real data, always", p: "Every quote, candle, market cap and coin profile on this site comes live from CoinGecko's public API. No fabricated feeds, no invented charts. The market you trade is the market that exists." },
   { icon: "🧮", h: "Honest mechanics", p: "Fees, spread, maintenance margin and liquidation formulas are the real ones, shown before every execution. If a strategy only 'works' when costs are hidden, it doesn't work." },
   { icon: "🔓", h: "Transparency over hype", p: "No fake testimonials, no invented awards, no manufactured urgency. This page tells you exactly what we are — and what we are not." },
 ];
@@ -19,13 +19,16 @@ export default function About() {
           <Reveal className="card" style={{ borderLeft: "3px solid var(--accent)", padding: "30px 34px" }}>
             <h2 style={{ fontSize: 24, marginBottom: 14 }}>The short version</h2>
             <p style={{ fontSize: 16, marginBottom: 14 }}>
-              <b>Vertex Trader is a paper-trading and education platform.</b> You trade with virtual funds against live cryptocurrency market data from CoinGecko. Spot orders, limit orders, leveraged futures with real liquidation math, swaps and automated DCA bots all execute against genuine live prices.
+              <b>Vertex Trader is a crypto trading platform.</b> You fund your wallet with crypto, then trade spot orders, limit orders, leveraged futures with real liquidation math, swaps and automated DCA bots — all executing against genuine live market data from CoinGecko.
             </p>
             <p style={{ fontSize: 16, marginBottom: 14 }}>
-              <b>What it is not:</b> Vertex Trader is not a broker, exchange or custodian. You cannot deposit or withdraw real money. No real assets change hands, and nothing here is financial advice or a solicitation to trade.
+              <b>Funding is crypto-only and humanly verified:</b> every deposit and withdrawal is checked manually by our admin team before funds move. No card details, no bank rails, no automated payment processors — and nothing here is financial advice or a solicitation to trade.
+            </p>
+            <p style={{ fontSize: 16, marginBottom: 14 }}>
+              <b>Demo mode lives in the terminal only:</b> a LIVE/DEMO switch gives you separate practice funds at the same live prices, so you can learn the mechanics without touching your balance.
             </p>
             <p style={{ fontSize: 16, color: "var(--muted)" }}>
-              Accounts, passwords, sessions, two-factor authentication and KYC verification are real, working features — they exist so your practice environment behaves like a professional platform and so your progress is protected.
+              Accounts, passwords, sessions, two-factor authentication and KYC verification are real, working features — they protect your wallet and your history.
             </p>
           </Reveal>
         </div>
@@ -65,7 +68,7 @@ export default function About() {
 
       <Section alt>
         <div className="container">
-          <CtaBand title={user ? `Welcome back, ${user.name.split(" ")[0]}` : "Your first trade is one click away"} text="Open the terminal and put the mechanics you just read about to work — with live data and virtual funds.">
+          <CtaBand title={user ? `Welcome back, ${user.name.split(" ")[0]}` : "Your first trade is one click away"} text="Open the terminal and put the mechanics you just read about to work — against live market data.">
             <Btn to="/trade" className="btn btn-primary btn-lg">Launch Terminal</Btn>
             <Btn to="/strategies" className="btn btn-ghost btn-lg">Step-by-step guide</Btn>
           </CtaBand>

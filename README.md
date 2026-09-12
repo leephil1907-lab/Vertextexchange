@@ -1,8 +1,8 @@
 # Vertex Trader
 
-A **crypto paper-trading platform** with live market data: practise spot, isolated-margin futures (with real liquidation math), swaps, DCA bots and price alerts against **real CoinGecko prices** — funded with **virtual funds only**. Full account stack included: scrypt-hashed passwords, token sessions, RFC-6238 TOTP two-factor auth, automated KYC validation, notification pipeline with branded HTML emails, conversation-style support tickets, funding ledger, and a hardened admin console.
+A **crypto trading platform** with live market data: trade spot, isolated-margin futures (with real liquidation math), swaps, DCA bots and price alerts against **real CoinGecko prices**. Funding is **crypto-only** (BTC, ETH, USDT-ERC20/TRC20, TRX, SOL, BNB, XRP) with **manual admin verification** of every deposit and withdrawal. The terminal offers **LIVE and DEMO sessions** — demo mode is the only place practice funds exist. Full account stack included: scrypt-hashed passwords, token sessions, RFC-6238 TOTP two-factor auth, automated KYC validation, notification pipeline with branded HTML emails, conversation-style support tickets, funding ledger, and a hardened admin console.
 
-> **Honest positioning.** This is not a broker or exchange. No real assets are held or traded, nothing here is financial advice, and verification outcomes carry no legal standing. Market data © CoinGecko (public API, attributed in-product). Charts render with TradingView Lightweight Charts (open source). All design, code and copy are original.
+> **Positioning.** Orders execute against live CoinGecko market data; funding is custodial and humanly verified — no automated payment rails. Trading involves substantial risk; nothing here is financial advice. Market data © CoinGecko (public API, attributed in-product). Charts render with TradingView Lightweight Charts (open source). All design, code and copy are original.
 
 ---
 
@@ -43,13 +43,13 @@ See `.env.example`. Key variables:
 ## Features
 
 - **Live data** — CoinGecko `/coins/markets`, `/coins/{id}`, `/market_chart`, `/global`; throttled queue (1 req/1.3s), TTL cache + stale fallback with visible "cached/rate-limited" states.
-- **Terminal** — candlesticks (6 timeframes) + EMA20/50, RSI & MACD panes (synced scales), spot market/limit orders, isolated-margin futures 1–50x with live ROE & auto-liquidation (`entry × (1 ∓ 1/lev ± 0.5%)`), swaps, DCA bots with take-profit, chart-plotted alerts & resting orders.
-- **Paper engine** — 0.10% spot fee, 0.05% futures fee, 4 bps execution spread on real mids, per-owner wallets persisted in localStorage; equity snapshots → P&L curve.
+- **Terminal** — LIVE/DEMO session switch, candlesticks (6 timeframes) + EMA20/50, RSI & MACD panes (synced scales), spot market/limit orders, isolated-margin futures 1–50x with live ROE & auto-liquidation (`entry × (1 ∓ 1/lev ± 0.5%)`), swaps, DCA bots with take-profit, chart-plotted alerts & resting orders.
+- **Trading engine** — 0.10% spot fee, 0.05% futures fee, 4 bps execution spread on real mids; separate **live** and **demo** wallets per owner (demo starts with €50,000 practice funds, live starts empty and is funded via verified deposits); equity snapshots → P&L curve.
 - **Accounts & security** — scrypt + per-user salt, bearer sessions, TOTP 2FA (any authenticator app), login history, suspension, password reset via branded email token.
 - **KYC** — automated rule validation (name/DOB/age/address/ID type/number/document image checks) with explicit rejection reasons and resubmission.
 - **Notifications** — per-channel email settings (security / trades / alerts / product), in-app bell feed, trading-event forwarding, honest outbox with `queued | sending | sent | failed`.
 - **Support** — tickets that are real conversations (user ↔ admin), status workflow, forced branded email on replies.
-- **Funding** — virtual deposits/withdrawals across fiat wallets & top-50 coins. Every request is **verified manually by an admin** before funds move: deposits credit on approval; withdrawals hold funds immediately and auto-refund on rejection. Decisions fire in-app notifications + branded emails. Payment mechanics are unchanged — the wallet is virtual, no real money or payment processor is involved.
+- **Funding** — crypto deposits to published receiving wallets (copy-to-clipboard method cards, network warnings, tx-reference field) and withdrawals to user addresses with network selection. Every request is **verified manually by an admin** before funds move: deposits credit on approval; withdrawals hold funds immediately and auto-refund on rejection. Decisions fire in-app notifications + branded emails. Payment methods are managed in Admin → Funding (enable/disable/edit; only enabled methods are public).
 - **Admin (`/admin`, stealth 404 for non-admins)** — stats, email composer with live branded-template preview & broadcasts, ticket inbox, **funding verification queue (approve/reject with mandatory reason)**, user suspension/roles, site announcement manager, global outbox with resend.
 - **Privacy rights** — JSON data export and password-confirmed account deletion.
 - **UX** — bright vivid light theme (default) + dark theme, fully responsive (desktop → 320px), cinematic generated artwork plus a canvas "living image" hero animated by live prices, code-split routes, error boundary, per-route titles, reduced-motion & focus-visible support.
@@ -65,6 +65,7 @@ GET /api/notifications · PATCH /api/notifications/settings · POST /api/notific
 POST /api/support · GET /api/support/mine · POST /api/support/:id/reply
 POST /api/funding/request · GET /api/funding/mine
 GET /api/admin/funding?status= · POST /api/admin/funding/:id/decide {action: approve|reject, reason}
+GET|POST /api/admin/payment-methods · PATCH|DELETE /api/admin/payment-methods/:id
 GET /api/config
 GET /api/admin/{stats,users,tickets,outbox} · POST /api/admin/{email}
 POST /api/admin/{tickets/:id/reply,tickets/:id/status,outbox/:id/resend,users/:id/role,users/:id/suspend}

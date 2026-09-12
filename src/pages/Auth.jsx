@@ -6,7 +6,7 @@ import { useApp } from "../app-context.jsx";
 import { api } from "../services/api.js";
 
 const BENEFITS = [
-  "Your paper wallet, orders and history saved to your account",
+  "Your wallet, orders and history saved to your account",
   "Portfolio P&L tracking across sessions",
   "KYC verification flow and account security tools",
   "Real two-factor authentication (RFC-6238 TOTP)",
@@ -48,7 +48,7 @@ export function Signup() {
       <div className="container auth-wrap" style={{ paddingTop: 30, paddingBottom: 30 }}>
         <motion.div className="auth-side" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
           <div className="kicker">Create account</div>
-          <h2>Start practising with <span className="grad-text">live market data</span></h2>
+          <h2>Start trading with <span className="grad-text">live market data</span></h2>
           <p>Your account keeps your virtual wallet, open orders, DCA bots and performance history — on this device, tied to your login.</p>
           <ul>{BENEFITS.map((b) => <li key={b}>{b}</li>)}</ul>
         </motion.div>
@@ -76,7 +76,7 @@ export function Signup() {
             </div>
             <label className="consent">
               <input type="checkbox" required />
-              I understand this platform is for <b>paper trading with virtual funds</b> only — no real assets, no financial services — and I accept the terms & risk warning.
+              I understand that crypto trading involves <b>substantial risk</b> — leveraged positions can be liquidated and I can lose my deposited balance — and I accept the terms & risk warning.
             </label>
             <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.98 }} className="btn btn-primary btn-lg btn-block" disabled={busy} type="submit">
               {busy ? "Creating account…" : "Create account"}

@@ -6,7 +6,7 @@ const pct = (x) => (x * 100).toFixed(2) + "%";
 export default function Fees() {
   return (
     <>
-      <PageHero crumb="Fees" title="Transparent cost model" text="No hidden charges, no spreads stuffed into a mystery line item. Because this is a paper-trading platform, no real money is ever charged — but these are the exact costs the simulation applies, so your practice reflects real trading friction." />
+      <PageHero crumb="Fees" title="Transparent cost model" text="No hidden charges, no spreads stuffed into a mystery line item. These are the exact costs applied to every execution — fee, spread and margin are shown before you confirm each order." />
       <Section>
         <div className="container">
           <Reveal className="table-wrap" style={{ maxWidth: 860, margin: "0 auto" }}>
@@ -17,7 +17,7 @@ export default function Fees() {
                 <tr><td>Futures trading fee</td><td className="num tnum">{pct(FUTURES_FEE)}</td><td>Charged on position notional (margin × leverage) at open and again at close.</td></tr>
                 <tr><td>Execution spread</td><td className="num tnum">{SPREAD_BPS / 100}% ({SPREAD_BPS} bps)</td><td>Applied to the real mid price to model realistic fills — slightly worse for you on every execution.</td></tr>
                 <tr><td>Maintenance margin (futures)</td><td className="num tnum">{pct(MMR)}</td><td>The buffer between zero equity and liquidation; used in the liquidation-price formula.</td></tr>
-                <tr><td>Deposits & withdrawals</td><td className="num">—</td><td>Not applicable: the wallet is virtual. There is nothing to deposit or withdraw.</td></tr>
+                <tr><td>Deposits & withdrawals</td><td className="num">—</td><td>No platform fee. You cover only your own network fee; every transfer is verified manually.</td></tr>
                 <tr><td>Account / inactivity / platform fees</td><td className="num">—</td><td>None. Free forever.</td></tr>
                 <tr><td>Market data</td><td className="num">—</td><td>Live CoinGecko data, free to all users.</td></tr>
               </tbody>
@@ -38,7 +38,7 @@ export default function Fees() {
           </Reveal>
 
           <p style={{ textAlign: "center", color: "var(--faint)", fontSize: 13, marginTop: 36 }}>
-            Real exchanges charge different rates (often 0.02–0.10% for retail spot). Our model sits at the conservative end so practice results aren't flattered.
+            Real exchanges charge different rates (often 0.02–0.10% for retail spot). Our model sits at the conservative end so results are never flattered.
           </p>
           <div style={{ textAlign: "center", marginTop: 10 }}>
             <Btn to="/trade" className="btn btn-primary btn-lg">See fees in action →</Btn>

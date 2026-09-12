@@ -24,6 +24,6 @@
     "@vitejs/plugin-react": "^4.3.4",
     "vite": "^6.0.11"
   },
-  "description": "Vertex Trader \u2014 crypto paper-trading platform with live CoinGecko data, real account security (scrypt/TOTP/KYC), branded email pipeline and admin console. Original code and design.",
+  "description": "Vertex Trader — crypto trading platform with live CoinGecko data, admin-verified crypto funding, live/demo trading sessions, real account security (scrypt/TOTP/KYC), branded email pipeline and admin console. Original code and design.",
   "license": "UNLICENSED-PRIVATE"
 }

@@ -117,7 +117,7 @@ function ComposerPreview({ subject, body, ctaLabel }) {
       <div style={{ maxWidth: 560, margin: "0 auto", borderRadius: 16, overflow: "hidden", border: "1px solid #1d2b47", background: "#0b1120" }}>
         <div style={{ background: "#0d1526", borderBottom: "1px solid #1d2b47", padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}><span style={{ color: "#2dd4a7" }}>▲</span> VERTEX<span style={{ color: "#4f8cff" }}>TRADER</span></span>
-          <span style={{ fontSize: 10, color: "#6b7a94", letterSpacing: ".08em", textTransform: "uppercase" }}>Live market data · virtual funds</span>
+          <span style={{ fontSize: 10, color: "#6b7a94", letterSpacing: ".08em", textTransform: "uppercase" }}>Live market data · verified crypto funding</span>
         </div>
         <div style={{ padding: "8px 24px 0" }}><div style={{ height: 3, borderRadius: 2, background: "#2dd4a7" }} /></div>
         <div style={{ padding: "22px 24px 6px" }}>
@@ -127,7 +127,7 @@ function ComposerPreview({ subject, body, ctaLabel }) {
         </div>
         <div style={{ padding: "0 24px 22px" }}>
           <div style={{ borderRadius: 12, background: "#0d1526", border: "1px solid #1d2b47", padding: "12px 16px", fontSize: 12, lineHeight: 1.6, color: "#8fa0ba" }}>
-            <b style={{ color: "#c7d2e4" }}>Risk warning:</b> cryptocurrency trading involves substantial risk; leveraged products can liquidate your margin. Vertex Trader is a paper-trading platform — all trading uses virtual funds, no real assets are held and nothing here is financial advice.
+            <b style={{ color: "#c7d2e4" }}>Risk warning:</b> cryptocurrency trading involves substantial risk; leveraged products can liquidate your margin. Deposits and withdrawals are verified manually by our team, and nothing here is financial advice.
           </div>
         </div>
         <div style={{ background: "#0d1526", borderTop: "1px solid #1d2b47", padding: "14px 24px", display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6b7a94" }}>
@@ -203,6 +203,107 @@ function Tickets() {
   );
 }
 
+/* ---------- payment methods management ---------- */
+const PM_ASSETS = [["bitcoin", "BTC"], ["ethereum", "ETH"], ["tether", "USDT"], ["tron", "TRX"], ["solana", "SOL"], ["binancecoin", "BNB"], ["ripple", "XRP"], ["dogecoin", "DOGE"], ["cardano", "ADA"], ["EUR", "EUR"], ["USD", "USD"], ["GBP", "GBP"], ["NGN", "NGN"]];
+const EMPTY_PM = { kind: "crypto", asset: "bitcoin", symbol: "BTC", network: "Bitcoin", address: "", bankName: "", accountName: "", accountNumber: "", note: "", enabled: true };
+
+function PaymentMethods() {
+  const [list, setList] = useState(null);
+  const [edit, setEdit] = useState(null); // "new" | method id | null
+  const [form, setForm] = useState(EMPTY_PM);
+  const startNew = () => { if (edit) { setEdit(null); return; } setForm(EMPTY_PM); setEdit("new"); };
+  const startEditM = (m) => { setForm({ ...EMPTY_PM, ...m }); setEdit(m.id); };
+  const load = () => api.adminPaymentMethods().then((r) => setList(r.paymentMethods || [])).catch(() => { });
+  useEffect(() => { load(); }, []);
+  const submit = async (e) => {
+    e.preventDefault();
+    try {
+      const r = edit === "new" ? await api.adminAddPaymentMethod(form) : await api.adminUpdatePaymentMethod(edit, form);
+      setList(r.paymentMethods); setEdit(null);
+    } catch (err) { alert(err.message); }
+  };
+  const toggle = async (m) => { try { const r = await api.adminUpdatePaymentMethod(m.id, { enabled: !m.enabled }); setList(r.paymentMethods); } catch (e) { alert(e.message); } };
+  const del = async (m) => { if (!confirm(`Delete ${m.symbol} · ${m.network}?`)) return; try { const r = await api.adminDeletePaymentMethod(m.id); setList(r.paymentMethods); } catch (e) { alert(e.message); } };
+  const inp = { width: "100%", padding: "9px 11px", fontSize: 13, borderRadius: 9, border: "1px solid var(--line)", background: "var(--bg-elev)", color: "var(--text)" };
+
+  return (
+    <div className="card" style={{ padding: 18, marginBottom: 22 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <div>
+          <h3 style={{ fontSize: 15, marginBottom: 2 }}>💳 Payment methods</h3>
+          <p style={{ color: "var(--muted)", fontSize: 12.5 }}>Receiving wallets shown to users on the Funding page. Only enabled methods are public. Deposits and withdrawals are crypto-only by design.</p>
+        </div>
+        <button className="btn btn-ghost" style={{ padding: "8px 14px", fontSize: 13 }} onClick={startNew}>{edit ? "Close" : "＋ Add method"}</button>
+      </div>
+
+      {edit && (
+        <form onSubmit={submit} style={{ marginTop: 14, borderTop: "1px solid var(--line)", paddingTop: 14 }}>
+          <div className="grid-2" style={{ gap: 12 }}>
+            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>Asset
+              <select style={{ ...inp, marginTop: 4 }} value={form.asset} onChange={(e) => {
+                const a = e.target.value; const sym = PM_ASSETS.find(([k]) => k === a)?.[1] || a;
+                setForm((f) => ({ ...f, asset: a, symbol: sym }));
+              }}>
+                {PM_ASSETS.map(([k, s]) => <option key={k} value={k}>{s} — {k}</option>)}
+              </select>
+            </label>
+            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>Network label
+              <input style={{ ...inp, marginTop: 4 }} required value={form.network} onChange={(e) => setForm((f) => ({ ...f, network: e.target.value }))} placeholder="e.g. Tron (TRC-20)" />
+            </label>
+          </div>
+          {form.kind === "crypto" ? (
+            <label style={{ fontSize: 12.5, color: "var(--muted)", display: "block", marginTop: 12 }}>Receiving wallet address
+              <input style={{ ...inp, marginTop: 4, fontFamily: "monospace" }} required minLength={10} value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} placeholder="bc1q… / 0x… / T… / r…" />
+            </label>
+          ) : (
+            <div className="grid-2" style={{ gap: 12, marginTop: 12 }}>
+              <label style={{ fontSize: 12.5, color: "var(--muted)" }}>Bank name<input style={{ ...inp, marginTop: 4 }} required value={form.bankName} onChange={(e) => setForm((f) => ({ ...f, bankName: e.target.value }))} /></label>
+              <label style={{ fontSize: 12.5, color: "var(--muted)" }}>Account name<input style={{ ...inp, marginTop: 4 }} required value={form.accountName} onChange={(e) => setForm((f) => ({ ...f, accountName: e.target.value }))} /></label>
+              <label style={{ fontSize: 12.5, color: "var(--muted)" }}>Account number<input style={{ ...inp, marginTop: 4 }} required value={form.accountNumber} onChange={(e) => setForm((f) => ({ ...f, accountNumber: e.target.value }))} /></label>
+            </div>
+          )}
+          <label style={{ fontSize: 12.5, color: "var(--muted)", display: "block", marginTop: 12 }}>Note to users (optional)
+            <input style={{ ...inp, marginTop: 4 }} value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} placeholder="e.g. Send USDT on Tron (TRC-20) only." />
+          </label>
+          <div style={{ display: "flex", gap: 10, marginTop: 14, alignItems: "center" }}>
+            <label style={{ fontSize: 12.5, color: "var(--muted)", display: "flex", gap: 6, alignItems: "center" }}>
+              <input type="checkbox" checked={form.enabled} onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))} /> Enabled (visible to users)
+            </label>
+            <span style={{ flex: 1 }} />
+            <button type="button" className="btn btn-ghost" style={{ padding: "8px 14px", fontSize: 13 }} onClick={() => setEdit(null)}>Cancel</button>
+            <button className="btn btn-primary" style={{ padding: "8px 18px", fontSize: 13 }} type="submit">{edit === "new" ? "Add method" : "Save changes"}</button>
+          </div>
+        </form>
+      )}
+
+      {!list ? <div className="spinner" style={{ margin: "16px auto" }} /> : list.length === 0 && !edit ? (
+        <p style={{ color: "var(--faint)", fontSize: 13, marginTop: 12 }}>No payment methods yet — users see an honest “being set up” notice on the Funding page until you add one.</p>
+      ) : (
+        <div className="table-wrap" style={{ marginTop: 14 }}>
+          <table className="data" style={{ minWidth: 640 }}>
+            <thead><tr><th>Asset</th><th>Network</th><th>Address / account</th><th>Status</th><th className="num">Actions</th></tr></thead>
+            <tbody>
+              {list.map((m) => (
+                <tr key={m.id}>
+                  <td><b>{m.symbol}</b><br /><small style={{ color: "var(--muted)" }}>{m.asset}</small></td>
+                  <td>{m.network}</td>
+                  <td style={{ fontFamily: "monospace", fontSize: 11.5, wordBreak: "break-all", maxWidth: 260 }}>{m.kind === "crypto" ? m.address : `${m.bankName} · ${m.accountName} · ${m.accountNumber}`}</td>
+                  <td><span className={"badge " + (m.enabled ? "badge-pop" : "badge-hot")}>{m.enabled ? "enabled" : "hidden"}</span></td>
+                  <td className="num" style={{ whiteSpace: "nowrap" }}>
+                    <button className="cancel-btn" style={{ color: "var(--accent)", marginRight: 8 }} onClick={() => startEditM(m)}>{edit === m.id ? "editing…" : "Edit"}</button>
+                    <button className="cancel-btn" style={{ color: "var(--accent-2)", marginRight: 8 }} onClick={() => toggle(m)}>{m.enabled ? "Disable" : "Enable"}</button>
+                    <button className="cancel-btn" style={{ color: "var(--down)" }} onClick={() => del(m)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------- funding verification (manual payment review) ---------- */
 function FundingAdmin() {
   const [list, setList] = useState(null);
@@ -219,20 +320,21 @@ function FundingAdmin() {
   };
   return (
     <Reveal>
+      <PaymentMethods />
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {[["pending", "⏳ Pending"], ["approved", "✓ Approved"], ["rejected", "✕ Rejected"], ["all", "All"]].map(([k, l]) => (
           <button key={k} className={"chip-toggle" + (filter === k ? " active" : "")} onClick={() => setFilter(k)}>{l}</button>
         ))}
       </div>
       <p style={{ color: "var(--muted)", fontSize: 13, marginBottom: 14 }}>
-        Payment verification is manual: approving a deposit credits the user's paper wallet on their next funding-page load (with notification + email); rejecting a withdrawal refunds their held funds automatically. No real money is ever involved.
+        Payment verification is manual: confirm each transfer in your wallets before approving. Approving a deposit credits the user's live wallet on their next funding-page load (with notification + email); rejecting a withdrawal refunds their held funds automatically. For withdrawals, send the payout to the shown address first, then approve to mark it paid.
       </p>
       {!list ? <div className="spinner" /> : (
         <div className="table-wrap">
           <table className="data" style={{ minWidth: 900 }}>
-            <thead><tr><th>Request</th><th>User</th><th>Type</th><th>Asset</th><th className="num">Amount</th><th>Submitted</th><th>Status</th><th className="num">Decision</th></tr></thead>
+            <thead><tr><th>Request</th><th>User</th><th>Type</th><th>Asset</th><th className="num">Amount</th><th>Payment detail</th><th>Submitted</th><th>Status</th><th className="num">Decision</th></tr></thead>
             <tbody>
-              {list.length === 0 && <tr><td colSpan={8} style={{ textAlign: "center", color: "var(--muted)", padding: 24 }}>No {filter === "all" ? "" : filter + " "}funding requests.</td></tr>}
+              {list.length === 0 && <tr><td colSpan={9} style={{ textAlign: "center", color: "var(--muted)", padding: 24 }}>No {filter === "all" ? "" : filter + " "}funding requests.</td></tr>}
               {list.map((r) => (
                 <tr key={r.id}>
                   <td className="tnum"><b>{r.id}</b></td>
@@ -240,6 +342,11 @@ function FundingAdmin() {
                   <td><span className={"badge " + (r.type === "deposit" ? "badge-pop" : "badge-hot")}>{r.type === "deposit" ? "↓ deposit" : "↑ withdraw"}</span></td>
                   <td><b>{r.assetLabel || r.asset}</b></td>
                   <td className="num tnum">{Number(r.amount).toLocaleString("en-US", { maximumFractionDigits: 6 })}</td>
+                  <td style={{ fontFamily: "monospace", fontSize: 10.5, wordBreak: "break-all", maxWidth: 180, color: "var(--muted)" }}>
+                    {r.type === "deposit"
+                      ? (r.txRef ? <>tx: {r.txRef}</> : <i>no tx ref given</i>)
+                      : (<>→ {r.destAddress}<br />{r.network}</>)}
+                  </td>
                   <td className="tnum" style={{ fontSize: 12.5 }}>{new Date(r.createdAt).toLocaleString()}</td>
                   <td>
                     <span className={"badge " + (r.status === "approved" ? "badge-pop" : r.status === "rejected" ? "badge-hot" : "badge-new")}>{r.status}</span>

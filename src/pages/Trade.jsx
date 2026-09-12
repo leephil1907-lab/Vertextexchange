@@ -40,7 +40,7 @@ function Toasts() {
 
 /* ---------------- main ---------------- */
 export default function Trade() {
-  const { fiat, setFiat, theme, user } = useApp();
+  const { fiat, setFiat, theme, user, sessionMode, setSessionMode } = useApp();
   const vs = CURRENCIES[fiat].vs;
   const [params, setParams] = useSearchParams();
 
@@ -177,10 +177,21 @@ export default function Trade() {
     <section style={{ paddingTop: 22 }}>
       <div className="term-container">
         <div className="term-banner">
-          <span>💶 Prices are <b>live from CoinGecko</b> · Orders execute against real prices using <b>virtual {fiat} funds</b> (paper trading). No real assets are involved.</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <span className="mode-switch" role="tablist" aria-label="Trading session mode">
+              <button type="button" role="tab" aria-selected={sessionMode === "live"} className={sessionMode === "live" ? "active live" : ""} onClick={() => setSessionMode("live")}>● LIVE</button>
+              <button type="button" role="tab" aria-selected={sessionMode === "demo"} className={sessionMode === "demo" ? "active demo" : ""} onClick={() => setSessionMode("demo")}>◑ DEMO</button>
+            </span>
+            {sessionMode === "live" ? (
+              <span>Live session — trading against your <b>funded balance</b> with prices <b>live from CoinGecko</b>. {!user ? <Link to="/signup" style={{ color: "var(--accent)", fontWeight: 700 }}>Sign up to sync your account →</Link> : <Link to="/funding" style={{ color: "var(--accent)", fontWeight: 700 }}>Fund your wallet →</Link>}</span>
+            ) : (
+              <span>Demo session — practising with <b>separate demo funds</b> at the same live prices. Your live balance is untouched.</span>
+            )}
+          </span>
           <span style={{ display: "flex", gap: 8 }}>
-            {!user && <Link to="/signup" style={{ color: "var(--accent)", fontWeight: 700 }}>Sign up to keep progress →</Link>}
-            <button type="button" onClick={() => { if (confirm("Reset your paper wallet, orders, positions and history?")) paper.reset(); }}>Reset wallet</button>
+            {sessionMode === "demo" && (
+              <button type="button" onClick={() => { if (confirm("Reset your DEMO wallet, orders, positions and history? Your live wallet is not affected.")) paper.reset(); }}>Reset demo wallet</button>
+            )}
           </span>
         </div>
 
@@ -420,7 +431,7 @@ export default function Trade() {
                 <div className="term-field"><label>Interval</label>
                   <div className="term-input">
                     <select value={dcaEvery} onChange={(e) => setDcaEvery(e.target.value)}>
-                      {[[1, "Every 1 minute (fast demo)"], [5, "Every 5 minutes"], [15, "Every 15 minutes"], [60, "Every hour"], [1440, "Every day"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                      {[[1, "Every 1 minute (fast)"], [5, "Every 5 minutes"], [15, "Every 15 minutes"], [60, "Every hour"], [1440, "Every day"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
                   </div>
                 </div>
@@ -574,7 +585,7 @@ export default function Trade() {
 
         <div className="grid-3" style={{ marginTop: 26 }}>
           {[
-            ["Real prices, virtual funds", "Every quote comes from CoinGecko's live API. Orders, margin and liquidation are computed against those real prices — but the wallet is virtual, so no capital is ever at risk."],
+            ["Live prices, real mechanics", "Every quote comes from CoinGecko's live API. Orders, margin and liquidation are computed against those real prices — on your funded balance in a live session, or on separate practice funds in a demo session."],
             ["Isolated-margin futures", "Choose 1x–50x, see entry, size, fees and estimated liquidation before you commit. Positions mark to the live price with ROE, and liquidate automatically when the math says so."],
             ["DCA on autopilot", "Schedule recurring buys at live prices with optional take-profit. Watch the bot work, then stop it whenever you like — purchased coins stay in your wallet."],
           ].map(([h, p], i) => (

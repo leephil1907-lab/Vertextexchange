@@ -3,7 +3,7 @@ import { Reveal, Btn, Section, SectionHead, PageHero, Tabs, CtaBand } from "../c
 
 const COURSES = {
   Beginner: [
-    { meta: "6 lessons · ~2 hrs", h: "Trading Foundations", p: "What spot and futures trading are, how margin and leverage really work, reading a candlestick chart, and placing your first paper trade safely." },
+    { meta: "6 lessons · ~2 hrs", h: "Trading Foundations", p: "What spot and futures trading are, how margin and leverage really work, reading a candlestick chart, and placing your first trade safely." },
     { meta: "5 lessons · ~1.5 hrs", h: "Understanding Crypto Markets", p: "What moves bitcoin and altcoins, market cycles, stablecoins, why volatility is both the opportunity and the risk, and how 24/7 trading changes your habits." },
     { meta: "4 lessons · ~1 hr", h: "Platform Walkthrough", p: "A guided tour of this terminal: charts, indicators, order types, the order book, DCA bots and the dashboard." },
   ],
@@ -37,7 +37,7 @@ const GLOSSARY = [
   ["Stop-loss", "A protective exit that caps your loss at a pre-set price level."],
   ["Drawdown", "Peak-to-trough decline of an equity curve — the true measure of how bumpy a strategy is."],
   ["ROE", "Return on equity for a futures position: unrealised P&L divided by the margin committed."],
-  ["Paper trading", "Practising with virtual funds against live market data — what this entire platform does."],
+  ["Demo mode", "A practice session inside the terminal with separate demo funds at the same live prices — switched via the LIVE/DEMO toggle."],
 ];
 
 const TABS = Object.keys(COURSES).map((k) => ({ id: k, label: k }));
@@ -48,7 +48,7 @@ export default function Learn() {
   const glossary = GLOSSARY.filter(([t, d]) => !gq || t.toLowerCase().includes(gq.toLowerCase()) || d.toLowerCase().includes(gq.toLowerCase()));
   return (
     <>
-      <PageHero img="/img/learn-cinema.jpg" crumb="Learn" title="Learn to trade, properly" text="Structured courses, a strategy library and a plain-language glossary — written for this platform, practised on live market data with virtual funds." />
+      <PageHero img="/img/learn-cinema.jpg" crumb="Learn" title="Learn to trade, properly" text="Structured courses, a strategy library and a plain-language glossary — written for this platform, practised on live market data." />
 
       <Section>
         <div className="container">
@@ -83,7 +83,7 @@ export default function Learn() {
 
       <Section>
         <div className="container">
-          <CtaBand title="Theory only sticks with practice" text="Open the strategies guide, follow the seven steps, and apply every concept on live charts with virtual funds.">
+          <CtaBand title="Theory only sticks with practice" text="Open the strategies guide, follow the seven steps, and apply every concept on live charts.">
             <Btn to="/strategies" className="btn btn-primary btn-lg">Open the guide</Btn>
             <Btn to="/learn" className="btn btn-ghost btn-lg" href="#glossary">Browse glossary</Btn>
           </CtaBand>

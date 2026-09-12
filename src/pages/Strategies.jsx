@@ -9,7 +9,7 @@ const GUIDE_KEY = "vt_guide_progress_v1";
 const GUIDE = [
   {
     h: "Create your account",
-    p: "Sign up with your email and a strong password. Your account stores your virtual wallet, orders, bots and performance history. You can also explore the terminal first without an account — progress is kept on this device as a guest.",
+    p: "Sign up with your email and a strong password. Your account stores your wallet, orders, bots and performance history. You can also explore the terminal first without an account — progress is kept on this device as a guest.",
     acts: [["Sign up free", "/signup"], ["Open terminal as guest", "/trade"]],
   },
   {

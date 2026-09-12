@@ -243,16 +243,97 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ---------- public site config (announcement bar etc.) ---------- */
+/* ---------- public site config (announcement bar, payment methods) ---------- */
 db.config = db.config || {
   announcement: {
     enabled: true,
-    text: "📡 Live market data by CoinGecko · Trading uses virtual funds (paper trading)",
+    text: "📡 Live market data by CoinGecko · New here? Start with the step-by-step guide",
     link: "/strategies",
-    linkLabel: "New here? Follow the step-by-step guide →",
+    linkLabel: "Open the guide →",
   },
 };
-app.get("/api/config", (_req, res) => res.json({ config: db.config }));
+db.config.paymentMethods = db.config.paymentMethods || [];
+
+/* public config exposes only ENABLED payment methods */
+app.get("/api/config", (_req, res) => {
+  res.json({ config: { ...db.config, paymentMethods: db.config.paymentMethods.filter((m) => m.enabled) } });
+});
+
+/* ---------- admin: payment methods management ---------- */
+const ASSET_KEYS = ["EUR", "USD", "GBP", "NGN", "bitcoin", "ethereum", "tether", "tron", "solana", "binancecoin", "ripple", "dogecoin", "cardano"];
+app.get("/api/admin/payment-methods", requireAdmin, (_req, res) => {
+  res.json({ paymentMethods: db.config.paymentMethods });
+});
+
+/* Seed the owner's real receiving wallets once (flag-guarded — admin edits/deletes persist).
+   Crypto-only by design: no bank rails, avoids banking/chargeback issues. */
+if (!db.config.paymentsSeeded) {
+  const seed = [
+    ["BTC", "bitcoin", "Bitcoin", "bc1qxg5h03774a2yx9nmxrk4y30d7uztdsunqf8au8"],
+    ["ETH", "ethereum", "Ethereum (ERC-20)", "0x00C8b5689486f1cBFBEdB04d07e88bdef32E168a"],
+    ["USDT", "tether", "Ethereum (ERC-20)", "0x00C8b5689486f1cBFBEdB04d07e88bdef32E168a"],
+    ["USDT", "tether", "Tron (TRC-20)", "TRxM3out1eB3sgZB93vW9NZKDG4DtdhytP"],
+    ["TRX", "tron", "Tron", "TRxM3out1eB3sgZB93vW9NZKDG4DtdhytP"],
+    ["SOL", "solana", "Solana", "2roecbe295dd9GUQH9x5sXMaXFGSsXmAF6YqUTSWd7Un"],
+    ["BNB", "binancecoin", "BNB Smart Chain (BEP-20)", "0x00C8b5689486f1cBFBEdB04d07e88bdef32E168a"],
+    ["XRP", "ripple", "XRP Ledger", "rpa5sHipkXMTdqUEkMYjSNjGrFrYsfCuu5"],
+  ];
+  for (const [symbol, asset, network, address] of seed) {
+    db.config.paymentMethods.push({
+      id: crypto.randomUUID(), kind: "crypto", asset, symbol, network, address,
+      bankName: "", accountName: "", accountNumber: "",
+      note: symbol === "tether" ? `Send USDT on ${network} only.` : `Send ${symbol} on the ${network} network only.`,
+      enabled: true, createdAt: Date.now(),
+    });
+  }
+  db.config.paymentsSeeded = true;
+  save();
+  console.log(`[payments] seeded ${seed.length} crypto receiving methods`);
+}
+app.post("/api/admin/payment-methods", requireAdmin, (req, res) => {
+  const b = req.body || {};
+  const kind = b.kind === "bank" ? "bank" : "crypto";
+  const asset = String(b.asset || "").trim();
+  if (!ASSET_KEYS.includes(asset)) return res.status(400).json({ error: "Asset must be one of: " + ASSET_KEYS.join(", ") });
+  const m = {
+    id: crypto.randomUUID(),
+    kind,
+    asset,
+    symbol: String(b.symbol || asset).trim().slice(0, 12),
+    network: String(b.network || "").trim().slice(0, 40),
+    address: kind === "crypto" ? String(b.address || "").trim().slice(0, 120) : "",
+    bankName: kind === "bank" ? String(b.bankName || "").trim().slice(0, 60) : "",
+    accountName: kind === "bank" ? String(b.accountName || "").trim().slice(0, 60) : "",
+    accountNumber: kind === "bank" ? String(b.accountNumber || "").trim().slice(0, 34) : "",
+    note: String(b.note || "").trim().slice(0, 160),
+    enabled: b.enabled !== false,
+    createdAt: Date.now(),
+  };
+  if (kind === "crypto" && m.address.length < 10) return res.status(400).json({ error: "A real receiving wallet address is required (min 10 chars)." });
+  if (kind === "bank" && (!m.bankName || !m.accountName || !m.accountNumber)) return res.status(400).json({ error: "Bank name, account name and account number are required." });
+  db.config.paymentMethods.push(m);
+  save();
+  res.status(201).json({ method: m, paymentMethods: db.config.paymentMethods });
+});
+
+app.patch("/api/admin/payment-methods/:id", requireAdmin, (req, res) => {
+  const m = db.config.paymentMethods.find((x) => x.id === req.params.id);
+  if (!m) return res.status(404).json({ error: "Payment method not found." });
+  const b = req.body || {};
+  for (const k of ["symbol", "network", "address", "bankName", "accountName", "accountNumber", "note"])
+    if (b[k] !== undefined) m[k] = String(b[k]).trim().slice(0, 160);
+  if (b.enabled !== undefined) m.enabled = !!b.enabled;
+  save();
+  res.json({ method: m, paymentMethods: db.config.paymentMethods });
+});
+
+app.delete("/api/admin/payment-methods/:id", requireAdmin, (req, res) => {
+  const before = db.config.paymentMethods.length;
+  db.config.paymentMethods = db.config.paymentMethods.filter((x) => x.id !== req.params.id);
+  if (db.config.paymentMethods.length === before) return res.status(404).json({ error: "Payment method not found." });
+  save();
+  res.json({ ok: true, paymentMethods: db.config.paymentMethods });
+});
 
 app.get("/api/health", (_req, res) => res.json({ ok: true, users: db.users.length, time: Date.now() }));
 
@@ -604,12 +685,26 @@ app.post("/api/funding/request", rateLimit("funding", 20, 10 * 60e3), (req, res)
   if (u.suspended) return res.status(403).json({ error: "Account suspended — contact support." });
   const type = req.body?.type;
   if (!["deposit", "withdraw"].includes(type)) return res.status(400).json({ error: "Type must be deposit or withdraw." });
-  const asset = String(req.body?.asset || "").trim();
-  const assetLabel = String(req.body?.assetLabel || asset).trim().slice(0, 24);
+  let asset = String(req.body?.asset || "").trim();
+  let assetLabel = String(req.body?.assetLabel || asset).trim().slice(0, 24);
   const amount = Number(req.body?.amount);
-  if (!asset || !/^[A-Za-z0-9-]{2,48}$/.test(asset)) return res.status(400).json({ error: "Invalid asset." });
+  const methodId = String(req.body?.methodId || "").trim();
+  const txRef = String(req.body?.txRef || "").trim().slice(0, 120);
+  const destAddress = String(req.body?.destAddress || "").trim().slice(0, 120);
+  const network = String(req.body?.network || "").trim().slice(0, 40);
+  let method = null;
+  if (type === "deposit") {
+    method = db.config.paymentMethods.find((m) => m.id === methodId && m.enabled);
+    if (!method) return res.status(400).json({ error: "Choose an available payment method." });
+    asset = method.asset;
+    assetLabel = method.symbol || method.asset;
+  } else {
+    if (!asset || !/^[A-Za-z0-9-]{2,48}$/.test(asset)) return res.status(400).json({ error: "Invalid asset." });
+    if (destAddress.length < 8) return res.status(400).json({ error: "Enter the destination wallet address for the payout." });
+    if (!network) return res.status(400).json({ error: "Select the network for the payout address." });
+  }
   if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: "Enter a valid amount." });
-  if (type === "deposit" && amount > 10_000_000) return res.status(400).json({ error: "Single virtual deposits are capped at 10,000,000." });
+  if (type === "deposit" && amount > 10_000_000) return res.status(400).json({ error: "Single deposits are capped at 10,000,000." });
   db.funding = db.funding || [];
   if (db.funding.filter((r) => r.userId === u.id && r.status === "pending").length >= 8)
     return res.status(429).json({ error: "Too many pending requests — wait for admin verification first." });
@@ -617,6 +712,11 @@ app.post("/api/funding/request", rateLimit("funding", 20, 10 * 60e3), (req, res)
     id: "FR-" + crypto.randomBytes(4).toString("hex").toUpperCase(),
     userId: u.id, email: u.email, name: u.name,
     type, asset, assetLabel, amount,
+    methodId: method ? method.id : null,
+    methodKind: method ? method.kind : null,
+    txRef: type === "deposit" ? txRef || null : null,
+    destAddress: type === "withdraw" ? destAddress : null,
+    network: type === "withdraw" ? network : null,
     status: "pending", reason: null,
     createdAt: Date.now(), decidedAt: null, decidedBy: null,
   };

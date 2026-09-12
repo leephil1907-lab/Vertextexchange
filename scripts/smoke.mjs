@@ -96,23 +96,41 @@ if (admLogin.status === 200 && admLogin.body.token) {
   const ar = await call(`/api/admin/tickets/${tk.body.id}/reply`, { text: "Support answer to smoke ticket." }, at);
   ok("admin ticket reply", ar.status === 200 && ar.body.ticket.status === "answered");
 
-  /* ----- funding: manual admin verification flow ----- */
-  const fr = await call("/api/funding/request", { type: "deposit", asset: "EUR", assetLabel: "EUR", amount: 250 }, tok);
-  ok("funding request created (pending)", fr.status === 201 && fr.body.request.status === "pending");
-  const badFr = await call("/api/funding/request", { type: "deposit", asset: "EUR", amount: -5 }, tok);
-  ok("funding rejects invalid amount", badFr.status === 400);
+  /* ----- payment methods + funding: manual admin verification flow ----- */
+  const pm = await call("/api/admin/payment-methods", { kind: "crypto", asset: "bitcoin", symbol: "BTC", network: "Bitcoin", address: "bc1qsmoketestaddress000000000000000000" }, at);
+  ok("admin adds payment method", pm.status === 201 && pm.body.method.enabled === true);
+  const cfg = await call("/api/config");
+  ok("public config exposes enabled methods", cfg.status === 200 && (cfg.body.config.paymentMethods || []).some((m) => m.id === pm.body.method.id));
+  await call(`/api/admin/payment-methods/${pm.body.method.id}`, { enabled: false }, at, "PATCH");
+  const cfg2 = await call("/api/config");
+  ok("disabled method hidden from public config", !(cfg2.body.config.paymentMethods || []).some((m) => m.id === pm.body.method.id));
+  await call(`/api/admin/payment-methods/${pm.body.method.id}`, { enabled: true }, at, "PATCH");
+  const noMethod = await call("/api/funding/request", { type: "deposit", amount: 250 }, tok);
+  ok("deposit requires a valid method", noMethod.status === 400);
+  const fr = await call("/api/funding/request", { type: "deposit", methodId: pm.body.method.id, amount: 0.005, txRef: "0xsmoketx123" }, tok);
+  ok("deposit request created (pending)", fr.status === 201 && fr.body.request.status === "pending" && fr.body.request.asset === "bitcoin");
+  const badW = await call("/api/funding/request", { type: "withdraw", asset: "bitcoin", amount: 0.001 }, tok);
+  ok("withdraw requires destination address", badW.status === 400);
+  const wr = await call("/api/funding/request", { type: "withdraw", asset: "bitcoin", assetLabel: "BTC", amount: 0.001, destAddress: "bc1quseraddress00000000000000000000000000", network: "Bitcoin" }, tok);
+  ok("withdraw request created with payout details", wr.status === 201 && wr.body.request.destAddress && wr.body.request.network === "Bitcoin");
   const noReason = await call(`/api/admin/funding/${fr.body.request.id}/decide`, { action: "reject" }, at);
   ok("reject requires a reason", noReason.status === 400);
   const fl = await call("/api/admin/funding?status=pending", undefined, at);
   ok("admin funding list", fl.status === 200 && fl.body.requests.some((r) => r.id === fr.body.request.id));
   const ap = await call(`/api/admin/funding/${fr.body.request.id}/decide`, { action: "approve" }, at);
   ok("admin approves deposit", ap.status === 200 && ap.body.request.status === "approved");
+  const rj = await call(`/api/admin/funding/${wr.body.request.id}/decide`, { action: "reject", reason: "Address mismatch — resubmit." }, at);
+  ok("admin rejects withdrawal with reason", rj.status === 200 && rj.body.request.status === "rejected" && rj.body.request.reason);
   const twice = await call(`/api/admin/funding/${fr.body.request.id}/decide`, { action: "reject", reason: "x" }, at);
   ok("decided request is immutable", twice.status === 400);
   const mine = await call("/api/funding/mine", undefined, tok);
-  ok("user sees approved request", mine.status === 200 && mine.body.requests.some((r) => r.id === fr.body.request.id && r.status === "approved"));
+  ok("user sees decided requests", mine.status === 200 && mine.body.requests.some((r) => r.id === fr.body.request.id && r.status === "approved"));
   const userPeek = await call("/api/admin/funding", undefined, tok);
   ok("funding admin list is admin-only", userPeek.status === 403);
+  const userPm = await call("/api/admin/payment-methods", undefined, tok);
+  ok("payment-method admin is admin-only", userPm.status === 403);
+  const delpm = await call(`/api/admin/payment-methods/${pm.body.method.id}`, undefined, at, "DELETE");
+  ok("admin deletes payment method", delpm.status === 200 && !delpm.body.paymentMethods.some((m) => m.id === pm.body.method.id));
 } else {
   console.log("  (admin login skipped — set ADMIN_EMAIL/ADMIN_PASSWORD env to include)");
 }

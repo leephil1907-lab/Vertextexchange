@@ -11,13 +11,15 @@ const FUTURES_FEE = 0.0005;    // 0.05% taker
 const SPREAD_BPS = 4;          // execution spread around real mid (paper fill model)
 const MMR = 0.005;             // maintenance margin ratio
 const START_FIAT = { EUR: 50000, USD: 0, GBP: 0, NGN: 0 };
+const LIVE_FIAT = { EUR: 0, USD: 0, GBP: 0, NGN: 0 };
 const EQUITY_SNAPSHOT_MS = 60e3;
 
-const LS = (owner) => `vt_paper_v3:${owner}`;
+const LS = (owner, mode = "live") => `vt_paper_v4:${mode}:${owner}`;
 
 class PaperEngine {
   constructor() {
     this.owner = "guest";
+    this.mode = "live";
     this.coinMeta = {};       // id -> {symbol, name, image}
     this.listeners = new Set();
     this.toastQ = [];
@@ -26,9 +28,10 @@ class PaperEngine {
     this._lastSnap = 0;
   }
 
-  init(owner = "guest") {
+  init(owner = "guest", mode = "live") {
     if (this._unsub) { this._unsub(); this._unsub = null; }
     this.owner = owner || "guest";
+    this.mode = mode === "demo" ? "demo" : "live";
     this.state = this.load();
     // live price updates drive matching/mark-to-market
     this._unsub = priceStore.subscribe(() => this.onPrices());
@@ -51,14 +54,14 @@ class PaperEngine {
       }
     } catch (e) { /* reset below */ }
     return {
-      balances: { fiat: { ...START_FIAT }, coins: {} },
+      balances: { fiat: { ...(this.mode === "demo" ? START_FIAT : LIVE_FIAT) }, coins: {} },
       fiat: "EUR",
       orders: [], history: [], positions: [], dcas: [], alerts: [],
       equityHistory: [], nextId: 1, leverage: 5,
       startedAt: Date.now(),
     };
   }
-  save() { try { localStorage.setItem(LS(this.owner), JSON.stringify(this.state)); } catch (e) { /* quota */ } }
+  save() { try { localStorage.setItem(LS(this.owner, this.mode), JSON.stringify(this.state)); } catch (e) { /* quota */ } }
 
   async loadMeta() {
     try {
@@ -429,7 +432,7 @@ class PaperEngine {
     if (fiat) this.state.balances.fiat[asset] = (this.state.balances.fiat[asset] || 0) + amount;
     else this.state.balances.coins[asset] = (this.state.balances.coins[asset] || 0) + amount;
     this.state.history.unshift({ id: this.state.nextId++, kind: "deposit", coinId: fiat ? null : asset, fiat: asset, side: "in", qty: amount, price: fiat ? 1 : (this.price(asset) || 0), time: Date.now() });
-    this.toast(`↓ Deposited ${amount.toLocaleString("en-US", { maximumFractionDigits: 6 })} ${fiat ? asset : this.meta(asset).symbol} into your paper wallet.`);
+    this.toast(`↓ Deposited ${amount.toLocaleString("en-US", { maximumFractionDigits: 6 })} ${fiat ? asset : this.meta(asset).symbol} into your wallet.`);
     this.save(); this.emit(); this.snapshotEquity(true);
     return true;
   }
@@ -444,19 +447,19 @@ class PaperEngine {
     if (fiat) this.state.balances.fiat[asset] = have - amount;
     else this.state.balances.coins[asset] = (this.state.balances.coins[asset] || 0) - amount;
     this.state.history.unshift({ id: this.state.nextId++, kind: "withdraw", coinId: fiat ? null : asset, fiat: asset, side: "out", qty: amount, price: fiat ? 1 : (this.price(asset) || 0), time: Date.now() });
-    this.toast(`↑ Withdrew ${amount.toLocaleString("en-US", { maximumFractionDigits: 6 })} ${fiat ? asset : this.meta(asset).symbol} out of your paper wallet.`);
+    this.toast(`↑ Withdrew ${amount.toLocaleString("en-US", { maximumFractionDigits: 6 })} ${fiat ? asset : this.meta(asset).symbol} out of your wallet.`);
     this.save(); this.emit(); this.snapshotEquity(true);
     return true;
   }
 
   reset() {
-    try { localStorage.removeItem(LS(this.owner)); } catch (e) { /* ignore */ }
+    try { localStorage.removeItem(LS(this.owner, this.mode)); } catch (e) { /* ignore */ }
     this.state = this.load();
-    this.toast("Paper wallet reset to starting balances.");
+    this.toast(this.mode === "demo" ? "Demo wallet reset to €50,000 practice funds." : "Live wallet cleared.");
     this.save();
     this.emit();
   }
 }
 
 export const paper = new PaperEngine();
-export { SPOT_FEE, FUTURES_FEE, SPREAD_BPS, MMR, START_FIAT };
+export { PaperEngine, SPOT_FEE, FUTURES_FEE, SPREAD_BPS, MMR, START_FIAT };

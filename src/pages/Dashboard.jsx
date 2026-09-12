@@ -596,7 +596,7 @@ function Settings() {
             <button type="button" className={theme === "dark" ? "active" : ""} onClick={() => theme !== "dark" && toggleTheme()}>🌙 Dark</button>
             <button type="button" className={theme === "light" ? "active" : ""} onClick={() => theme !== "light" && toggleTheme()}>☀️ Light</button>
           </div>
-          <label style={{ fontSize: 12.5, color: "var(--muted)", display: "block", marginBottom: 6 }}>Paper wallet</label>
+          <label style={{ fontSize: 12.5, color: "var(--muted)", display: "block", marginBottom: 6 }}>Wallet</label>
           <button className="btn btn-ghost" style={{ color: "var(--down)" }} onClick={() => { if (confirm("Reset wallet, orders, positions, bots and history?")) paper.reset(); }}>Reset virtual wallet</button>
         </div>
       </Reveal>

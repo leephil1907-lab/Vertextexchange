@@ -12,14 +12,14 @@ const P = ({ children }) => <p style={{ color: "var(--muted)", fontSize: 14.5, m
 export function Terms() {
   return (
     <>
-      <PageHero crumb="Terms" title="Terms of Use" text="Plain-language terms for a paper-trading platform. Last updated: September 2026." />
+      <PageHero crumb="Terms" title="Terms of Use" text="Plain-language terms for a crypto trading platform. Last updated: September 2026." />
       <Section>
         <div className="container" style={{ maxWidth: 860 }}>
           <Block h="1. What this service is">
-            <P>Vertex Trader is a <b>paper-trading and education platform</b>. It simulates trading with virtual funds against live cryptocurrency market data provided by CoinGecko's public API. It is not a broker, exchange, bank or custodian, and it offers no financial services.</P>
+            <P>Vertex Trader is a <b>crypto trading platform</b>. Orders execute against live cryptocurrency market data provided by CoinGecko's public API. Funding is crypto-only: deposits and withdrawals are transferred on-chain and <b>verified manually</b> by our team. A demo session with separate practice funds is available inside the trading terminal; demo funds have no value and cannot be withdrawn.</P>
           </Block>
-          <Block h="2. Virtual funds only">
-            <P>All balances, wallets, orders, positions and P&L on this platform are <b>virtual</b>. You cannot deposit or withdraw real money, and no real assets are ever held, transferred or traded. The Funding page moves virtual balances only.</P>
+          <Block h="2. Funding, custody & verification">
+            <P>To deposit, you send crypto to a published receiving address and submit the amount and transaction reference; your wallet is credited after an admin verifies the transfer on-chain. To withdraw, you provide your address and network; the amount is held from your balance, verified, and paid out manually. <b>Double-check your withdrawal address — payouts to incorrect addresses cannot be reversed.</b> Send deposits only on the exact network shown; cross-network transfers cannot be recovered. We may reject any funding request with a stated reason; held funds are refunded automatically on rejection.</P>
           </Block>
           <Block h="3. Accounts and acceptable use">
             <P>You must provide accurate registration details and keep your credentials secret. You are responsible for activity under your account, including enabling two-factor authentication where available. You agree not to abuse rate limits, attempt unauthorised access (including to admin areas), scrape aggressively, submit false KYC documents, or use the platform for any unlawful purpose.</P>
@@ -31,13 +31,13 @@ export function Terms() {
             <P>Prices, charts and statistics come from CoinGecko's free public API and may be delayed, rate-limited or unavailable. The platform labels cached data honestly when live feeds are limited. Data is provided "as is" without warranty.</P>
           </Block>
           <Block h="6. KYC and verification">
-            <P>Identity verification is an automated, rule-based product demonstration. Its outcomes carry <b>no legal standing</b>, create no financial relationship, and are not a substitute for any regulated onboarding process.</P>
+            <P>Identity verification is automated and rule-based (completeness, minimum age 18+, document checks). It protects the platform and its users, and verification may be required before funding or withdrawal limits are lifted.</P>
           </Block>
           <Block h="7. Suspension and termination">
             <P>We may suspend or terminate accounts that breach these terms, abuse the platform, or threaten its integrity. You may delete your account at any time from Dashboard → Settings; deletion removes your profile, tickets and emails from our storage.</P>
           </Block>
-          <Block h="8. Liability">
-            <P>The service is provided without warranties of any kind. To the maximum extent permitted by law, we are not liable for losses arising from use of the platform, including lost profits or data, since no real funds are involved and use is at your own risk.</P>
+          <Block h="8. Liability & risk">
+            <P>The service is provided without warranties of any kind. Cryptocurrency trading involves substantial risk; leveraged positions can liquidate and you can lose your entire deposited balance. To the maximum extent permitted by law, we are not liable for trading losses, market moves, data delays or losses arising from use of the platform. Trade only with funds you can afford to lose.</P>
           </Block>
           <Block h="9. Changes & contact">
             <P>We may update these terms; continued use after changes constitutes acceptance. Questions: <Link to="/support" style={{ color: "var(--accent)" }}>open a support ticket</Link>.</P>
@@ -55,7 +55,7 @@ export function Privacy() {
       <Section>
         <div className="container" style={{ maxWidth: 860 }}>
           <Block h="1. Data we collect">
-            <P><b>Account:</b> name, email, hashed password (scrypt + salt), currency and theme preferences, creation date. <b>Security:</b> 2FA secret (if enabled), login history (time, IP, result). <b>KYC (optional):</b> identity details and document images you submit. <b>Support:</b> ticket conversations. <b>Notifications:</b> your channel preferences and generated emails. <b>Paper wallet:</b> stored per-device in your browser for guests, per-account on the server for logged-in users.</P>
+            <P><b>Account:</b> name, email, hashed password (scrypt + salt), currency and theme preferences, creation date. <b>Security:</b> 2FA secret (if enabled), login history (time, IP, result). <b>KYC (optional):</b> identity details and document images you submit. <b>Funding:</b> deposit/withdrawal requests, including amounts, transaction references and destination wallet addresses you provide. <b>Support:</b> ticket conversations. <b>Notifications:</b> your channel preferences and generated emails. <b>Wallet & trading data:</b> stored in your browser per device, keyed to your account id.</P>
           </Block>
           <Block h="2. What we never collect">
             <P>No payment data (there are no payments), no real financial account links, no third-party advertising trackers, and no cross-site profiling. Market data you view is fetched from CoinGecko directly.</P>

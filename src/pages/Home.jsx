@@ -8,16 +8,16 @@ import Sparkline from "../components/Sparkline.jsx";
 import LiveScene from "../components/LiveScene.jsx";
 
 const MARQUEE = [
-  "⚡ Spot & futures paper trading", "📈 RSI · MACD · EMA panes", "🤖 Automated DCA bots", "🔔 Live price alerts",
+  "⚡ Spot & futures trading", "📈 RSI · MACD · EMA panes", "🤖 Automated DCA bots", "🔔 Live price alerts",
   "🛡️ scrypt + TOTP 2FA security", "🪪 Automated KYC validation", "💶 EUR · USD · GBP · NGN wallets",
-  "📡 Live CoinGecko market data", "🎫 Conversation-style support", "✉️ Branded email notifications", "↓↑ Virtual funding & history",
+  "📡 Live CoinGecko market data", "🎫 Conversation-style support", "✉️ Branded email notifications", "↓↑ Crypto deposits & withdrawals",
 ];
 
 const GUIDE_STEPS = [
   { h: "Create your account", p: "Email + password protected with scrypt hashing. Add real app-based 2FA from your dashboard." },
   { h: "Verify (optional)", p: "Automated KYC with document upload and explicit validation reasons — or skip it and trade anyway." },
   { h: "Study your market", p: "Live top-100 coins with real stats and full analysis pages: candles, supply, ATH/ATL, indicators." },
-  { h: "Trade with virtual funds", p: "Spot, futures with real liquidation math, DCA bots — every fill at live prices, zero real money at risk." },
+  { h: "Trade on live prices", p: "Spot, futures with real liquidation math, DCA bots — every fill executed at genuine live CoinGecko prices." },
 ];
 
 /* ---------- overlapping glass stats band ---------- */
@@ -157,14 +157,15 @@ export default function Home() {
         <div className="container hero-grid">
           <div>
             <motion.span className="eyebrow" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-              <span className="pulse-dot" /> Paper trading · live CoinGecko prices · virtual funds
+              <span className="pulse-dot" /> Live CoinGecko prices · crypto funding · admin-verified
             </motion.span>
             <motion.h1 initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}>
-              Trade the real market.<br /><span className="grad-text">Risk nothing.</span>
+              Trade the real market.<br /><span className="grad-text">Fund · Trade · Withdraw.</span>
             </motion.h1>
             <motion.p className="lead" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}>
               Spot, 50x futures with real liquidation math, DCA bots, RSI/MACD charting and live alerts —
-              executing against genuine CoinGecko prices, funded with virtual {fiat}. Master the craft before you fund it for real.
+              executing against genuine CoinGecko prices. Deposit crypto, trade live, withdraw to your own wallet;
+              every funding request is verified manually by our team.
             </motion.p>
             <motion.div className="hero-actions" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <Btn to="/trade" className="btn btn-primary btn-lg">🚀 Launch Terminal</Btn>
@@ -202,7 +203,7 @@ export default function Home() {
                   <span className={"hlc-chg tnum " + (p.chg >= 0 ? "up" : "down")}>{p.chg >= 0 ? "▲" : "▼"} {Math.abs(p.chg).toFixed(2)}%</span>
                 </div>
               ))}
-              <div className="hlc-foot">Scene animates with live 24h moves · virtual wallet</div>
+              <div className="hlc-foot">Scene animates with live 24h moves</div>
             </div>
           </motion.div>
         </div>
@@ -319,7 +320,7 @@ export default function Home() {
             <div className="trust-badge"><span className="tb-ico">🔐</span><div><b>Password security</b><small>scrypt hashing + per-user salt</small></div></div>
             <div className="trust-badge"><span className="tb-ico">🔑</span><div><b>Two-factor auth</b><small>RFC-6238 TOTP, any authenticator app</small></div></div>
             <div className="trust-badge"><span className="tb-ico">🪪</span><div><b>KYC validation</b><small>Automated rules with explicit reasons</small></div></div>
-            <div className="trust-badge"><span className="tb-ico">💶</span><div><b>Non-custodial</b><small>We never hold real funds — virtual only</small></div></div>
+            <div className="trust-badge"><span className="tb-ico">💶</span><div><b>Verified funding</b><small>Deposits & withdrawals checked manually</small></div></div>
           </div>
           <p style={{ textAlign: "center", color: "var(--faint)", fontSize: 12.5, marginTop: 22, maxWidth: 720, marginInline: "auto" }}>
             We deliberately do not display third-party audit or review badges unless a genuine, verifiable relationship exists.
@@ -331,7 +332,7 @@ export default function Home() {
       {/* ================= FINAL CTA ================= */}
       <Section>
         <div className="container">
-          <CtaBand img="/img/strategy-cinema.jpg" title="Your first trade is 60 seconds away" text="Open the terminal, pick a coin, place a virtual order against the live price. No signup needed to explore — create an account to keep your progress.">
+          <CtaBand img="/img/strategy-cinema.jpg" title="Your first trade is 60 seconds away" text="Open the terminal, pick a coin, trade against live prices. Create an account to fund your wallet and keep your progress.">
             <Btn to="/trade" className="btn btn-primary btn-lg">Launch Terminal</Btn>
             <Btn to="/markets" className="btn btn-ghost btn-lg">Browse Markets</Btn>
           </CtaBand>

@@ -8,12 +8,14 @@ export const useApp = () => useContext(AppCtx);
 
 const THEME_KEY = "vt_theme_v1";
 const FIAT_KEY = "vt_fiat_v1";
+const MODE_KEY = "vt_session_mode_v1";
 
 export function AppProvider({ children }) {
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || "light");
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [fiat, setFiatState] = useState(() => localStorage.getItem(FIAT_KEY) || "EUR");
+  const [sessionMode, setSessionModeState] = useState(() => (localStorage.getItem(MODE_KEY) === "demo" ? "demo" : "live"));
 
   /* apply theme */
   useEffect(() => {
@@ -48,12 +50,20 @@ export function AppProvider({ children }) {
     return () => { alive = false; };
   }, []);
 
-  /* bind paper engine to identity */
+  /* bind trading engine to identity + session mode (live | demo) */
   useEffect(() => {
     if (authLoading) return;
-    paper.init(user ? user.id : "guest");
+    paper.init(user ? user.id : "guest", sessionMode);
     paper.setFiat(fiat);
-  }, [authLoading, user]);
+  }, [authLoading, user, sessionMode]);
+
+  const setSessionMode = useCallback((m) => {
+    const mode = m === "demo" ? "demo" : "live";
+    setSessionModeState(mode);
+    localStorage.setItem(MODE_KEY, mode);
+    paper.init(user ? user.id : "guest", mode);
+    paper.setFiat(fiat);
+  }, [user, fiat]);
 
   /* forward trading events to the account's notification pipeline */
   useEffect(() => {
@@ -126,7 +136,7 @@ export function AppProvider({ children }) {
   }, []);
 
   return (
-    <AppCtx.Provider value={{ theme, toggleTheme, user, authLoading, login, finishLogin, signup, logout, refreshUser, fiat, setFiat }}>
+    <AppCtx.Provider value={{ theme, toggleTheme, user, authLoading, login, finishLogin, signup, logout, refreshUser, fiat, setFiat, sessionMode, setSessionMode }}>
       {children}
     </AppCtx.Provider>
   );

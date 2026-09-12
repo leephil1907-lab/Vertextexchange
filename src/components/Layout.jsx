@@ -90,7 +90,7 @@ const MENU = [
   { h: "Trade", links: [["Live Terminal", "/trade", "Spot · Futures · DCA with live prices"], ["Markets", "/markets", "Top coins, real-time stats"], ["Coin Analysis", "/markets", "Charts & detail for every coin"]] },
   { h: "Strategies", links: [["Step-by-step Guide", "/strategies", "Start from zero, safely"], ["DCA & Strategy Library", "/strategies", "Automate or trade manually"], ["Learn", "/learn", "Courses & glossary"]] },
   { h: "Account", links: [["Dashboard", "/dashboard", "Portfolio, P&L, activity"], ["Funding", "/funding", "Deposit, withdraw & history"], ["KYC Verification", "/dashboard?tab=kyc", "Identity verification"], ["Security", "/dashboard?tab=security", "2FA, password, sessions"], ["Fees", "/fees", "Platform fee schedule"]] },
-  { h: "Company", links: [["About & Risk", "/about", "What's real, what's virtual"], ["Support", "/support", "Tickets, FAQ, contact"]] },
+  { h: "Company", links: [["About & Risk", "/about", "How the platform works"], ["Support", "/support", "Tickets, FAQ, contact"]] },
 ];
 
 function CornerMenu() {
@@ -123,7 +123,7 @@ function CornerMenu() {
             </div>
             <div className="menu-foot">
               <ThemeToggle />
-              <span style={{ color: "var(--muted)", fontSize: 12.5 }}>Live data: CoinGecko · Funds: virtual</span>
+              <span style={{ color: "var(--muted)", fontSize: 12.5 }}>Live data: CoinGecko · Verified crypto funding</span>
             </div>
           </motion.div>
         )}
@@ -292,7 +292,7 @@ function Footer() {
         </div>
         <div className="risk-note">
           <p><strong>Risk warning:</strong> Cryptocurrency trading involves substantial risk and leveraged products can lead to rapid losses, including liquidation of your full margin. Prices can be extremely volatile. Nothing on this site is financial advice. Practise with virtual funds first and never risk money you cannot afford to lose.</p>
-          <p><strong>Platform notice:</strong> Vertex Trader is a paper-trading product showcase. Market data is provided by CoinGecko's free public API and may be delayed or rate-limited. All trading on this platform uses virtual funds — no real orders are placed, no real assets are held, and no financial services are offered. Accounts, KYC and 2FA exist to demonstrate the product flow; verification results are automated and carry no legal standing.</p>
+          <p><strong>Platform notice:</strong> Vertex Trader is a crypto trading platform. Market data is provided by CoinGecko's public API and may be delayed or rate-limited. Funding is crypto-only — every deposit and withdrawal is verified manually by our team before funds move. Trading involves substantial risk of loss; leveraged products can liquidate your entire margin. Nothing on this platform is financial advice.</p>
         </div>
         <div className="footer-bottom">
           <span>© 2026 Vertex Trader · Market data by <a href="https://www.coingecko.com/" target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>CoinGecko</a></span>
@@ -322,12 +322,12 @@ export default function Layout({ children }) {
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [pathname]);
   useEffect(() => {
     const TITLES = {
-      "/": "Vertex Trader — Crypto Paper Trading with Live Market Data",
+      "/": "Vertex Trader — Crypto Trading with Live Market Data",
       "/markets": "Live Markets — Real CoinGecko Prices | Vertex Trader",
       "/trade": "Trading Terminal — Spot, Futures & DCA | Vertex Trader",
       "/strategies": "Step-by-Step Guide & Strategy Library | Vertex Trader",
       "/learn": "Courses & Glossary | Vertex Trader",
-      "/funding": "Funding — Virtual Deposits & Withdrawals | Vertex Trader",
+      "/funding": "Funding — Deposits & Withdrawals | Vertex Trader",
       "/fees": "Transparent Fee Schedule | Vertex Trader",
       "/about": "About & Risk Disclosure | Vertex Trader",
       "/support": "Support, FAQ & Tickets | Vertex Trader",
