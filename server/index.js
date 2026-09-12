@@ -533,6 +533,7 @@ app.delete("/api/me", (req, res) => {
   for (const [tok, s] of Object.entries(db.sessions)) if (s.userId === u.id) delete db.sessions[tok];
   db.tickets = db.tickets.filter((t) => t.userId !== u.id);
   db.outbox = (db.outbox || []).filter((o) => o.userId !== u.id);
+  db.funding = (db.funding || []).filter((r) => r.userId !== u.id);
   save();
   res.json({ ok: true });
 });
@@ -588,6 +589,86 @@ app.post("/api/notifications/test", rateLimit("tmail", 6, 10 * 60e3), (req, res)
 });
 
 /* ----- admin: stats, users, email composer, ticket conversations ----- */
+/* ============================================================
+   Funding requests — deposits & withdrawals are VERIFIED MANUALLY
+   by an admin before funds move. Payments themselves are unchanged:
+   the wallet is virtual, no real money or payment processor involved.
+   Flow: user submits request (withdrawals reserve funds client-side)
+   → admin approves/rejects (reason required to reject) → user gets
+   in-app notification + branded email → client applies the credit or
+   refund to the paper wallet.
+   ============================================================ */
+app.post("/api/funding/request", rateLimit("funding", 20, 10 * 60e3), (req, res) => {
+  const u = getUser(req);
+  if (!u) return res.status(401).json({ error: "Not authenticated." });
+  if (u.suspended) return res.status(403).json({ error: "Account suspended — contact support." });
+  const type = req.body?.type;
+  if (!["deposit", "withdraw"].includes(type)) return res.status(400).json({ error: "Type must be deposit or withdraw." });
+  const asset = String(req.body?.asset || "").trim();
+  const assetLabel = String(req.body?.assetLabel || asset).trim().slice(0, 24);
+  const amount = Number(req.body?.amount);
+  if (!asset || !/^[A-Za-z0-9-]{2,48}$/.test(asset)) return res.status(400).json({ error: "Invalid asset." });
+  if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: "Enter a valid amount." });
+  if (type === "deposit" && amount > 10_000_000) return res.status(400).json({ error: "Single virtual deposits are capped at 10,000,000." });
+  db.funding = db.funding || [];
+  if (db.funding.filter((r) => r.userId === u.id && r.status === "pending").length >= 8)
+    return res.status(429).json({ error: "Too many pending requests — wait for admin verification first." });
+  const r = {
+    id: "FR-" + crypto.randomBytes(4).toString("hex").toUpperCase(),
+    userId: u.id, email: u.email, name: u.name,
+    type, asset, assetLabel, amount,
+    status: "pending", reason: null,
+    createdAt: Date.now(), decidedAt: null, decidedBy: null,
+  };
+  db.funding.unshift(r);
+  if (db.funding.length > 500) db.funding.length = 500;
+  save();
+  res.status(201).json({ request: r });
+});
+
+app.get("/api/funding/mine", (req, res) => {
+  const u = getUser(req);
+  if (!u) return res.status(401).json({ error: "Not authenticated." });
+  res.json({ requests: (db.funding || []).filter((r) => r.userId === u.id) });
+});
+
+app.get("/api/admin/funding", requireAdmin, (req, res) => {
+  let list = db.funding || [];
+  const status = String(req.query.status || "");
+  if (["pending", "approved", "rejected"].includes(status)) list = list.filter((r) => r.status === status);
+  res.json({ requests: list, pendingCount: (db.funding || []).filter((r) => r.status === "pending").length });
+});
+
+app.post("/api/admin/funding/:id/decide", rateLimit("fundingdecide", 120, 10 * 60e3), requireAdmin, (req, res) => {
+  const r = (db.funding || []).find((x) => x.id === req.params.id);
+  if (!r) return res.status(404).json({ error: "Funding request not found." });
+  if (r.status !== "pending") return res.status(400).json({ error: "This request was already decided." });
+  const action = req.body?.action;
+  if (!["approve", "reject"].includes(action)) return res.status(400).json({ error: "Action must be approve or reject." });
+  const reason = String(req.body?.reason || "").trim().slice(0, 300);
+  if (action === "reject" && !reason) return res.status(400).json({ error: "A reason is required to reject a funding request." });
+  const u = db.users.find((x) => x.id === r.userId);
+  r.status = action === "approve" ? "approved" : "rejected";
+  r.reason = reason || null;
+  r.decidedAt = Date.now();
+  r.decidedBy = req.admin.email;
+  save();
+  if (u) {
+    const amt = `${r.amount.toLocaleString("en-US", { maximumFractionDigits: 6 })} ${r.assetLabel || r.asset}`;
+    const label = r.type === "deposit" ? "Deposit" : "Withdrawal";
+    const title = `${label} ${r.status} — ${amt}`;
+    const body = r.status === "approved"
+      ? `Your ${r.type} request ${r.id} for ${amt} passed manual verification and was ${r.type === "deposit" ? "credited to your paper wallet" : "completed"}. Open the funding page to see your updated balance and history.`
+      : `Your ${r.type} request ${r.id} for ${amt} was declined during manual verification.\n\nReason: ${reason}\n\nYou can submit a corrected request any time from the funding page.`;
+    ensureNotif(u);
+    u.notifications.unshift({ id: crypto.randomUUID(), kind: "funding", title, body, time: Date.now(), read: false });
+    if (u.notifications.length > 60) u.notifications.length = 60;
+    queueEmail(u, title, body, APP_URL ? { ctaUrl: APP_URL + "/funding", ctaLabel: "Open funding page" } : {});
+    save();
+  }
+  res.json({ request: r });
+});
+
 app.get("/api/admin/stats", requireAdmin, (_req, res) => {
   const ob = db.outbox || [];
   res.json({
@@ -596,6 +677,8 @@ app.get("/api/admin/stats", requireAdmin, (_req, res) => {
     verified: db.users.filter((u) => u.kyc?.status === "verified").length,
     ticketsOpen: db.tickets.filter((t) => t.status === "open").length,
     ticketsTotal: db.tickets.length,
+    fundingPending: (db.funding || []).filter((r) => r.status === "pending").length,
+    fundingTotal: (db.funding || []).length,
     emailsSent: ob.filter((o) => o.status === "sent").length,
     emailsQueued: ob.filter((o) => o.status === "queued" || o.status === "sending").length,
     emailsFailed: ob.filter((o) => o.status === "failed").length,

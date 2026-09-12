@@ -60,5 +60,9 @@ export const api = {
   adminConfig: (announcement) => call("/api/admin/config", { method: "PATCH", body: { announcement } }),
   support: (payload) => call("/api/support", { method: "POST", body: payload }),
   myTickets: () => call("/api/support/mine"),
+  fundingRequest: (type, asset, assetLabel, amount) => call("/api/funding/request", { method: "POST", body: { type, asset, assetLabel, amount } }),
+  myFunding: () => call("/api/funding/mine"),
+  adminFunding: (status) => call("/api/admin/funding" + (status ? `?status=${status}` : "")),
+  adminFundingDecide: (id, action, reason) => call(`/api/admin/funding/${id}/decide`, { method: "POST", body: { action, reason } }),
   subscribe: (email) => call("/api/subscribe", { method: "POST", auth: false, body: { email } }),
 };

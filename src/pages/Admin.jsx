@@ -4,7 +4,7 @@ import { Reveal, Section } from "../components/ui.jsx";
 import { useApp } from "../app-context.jsx";
 import { api } from "../services/api.js";
 
-const TABS = [["overview", "📊 Overview"], ["composer", "✉️ Email Composer"], ["tickets", "🎫 Tickets"], ["users", "👥 Users"], ["announce", "📢 Announcement"], ["outbox", "📤 Outbox"]];
+const TABS = [["overview", "📊 Overview"], ["composer", "✉️ Email Composer"], ["tickets", "🎫 Tickets"], ["funding", "💶 Funding"], ["users", "👥 Users"], ["announce", "📢 Announcement"], ["outbox", "📤 Outbox"]];
 
 function Overview({ stats }) {
   if (!stats) return <div className="spinner" />;
@@ -12,6 +12,7 @@ function Overview({ stats }) {
     ["Registered users", stats.users, ""],
     ["KYC verified", stats.verified, ""],
     ["Open tickets", stats.ticketsOpen, stats.ticketsOpen ? "down" : "up"],
+    ["Funding pending", stats.fundingPending ?? 0, stats.fundingPending ? "down" : "up"],
     ["Total tickets", stats.ticketsTotal, ""],
     ["Emails sent", stats.emailsSent, "up"],
     ["Emails queued", stats.emailsQueued, stats.emailsQueued ? "" : ""],
@@ -202,6 +203,68 @@ function Tickets() {
   );
 }
 
+/* ---------- funding verification (manual payment review) ---------- */
+function FundingAdmin() {
+  const [list, setList] = useState(null);
+  const [filter, setFilter] = useState("pending");
+  const [reasons, setReasons] = useState({});
+  const [busy, setBusy] = useState(null);
+  const load = () => api.adminFunding(filter === "all" ? "" : filter).then((r) => setList(r.requests || [])).catch(() => { });
+  useEffect(() => { setList(null); load(); }, [filter]);
+  const decide = async (r, action) => {
+    const reason = (reasons[r.id] || "").trim();
+    if (action === "reject" && !reason) { alert("Enter a rejection reason first — the user sees it in their history and email."); return; }
+    setBusy(r.id);
+    try { await api.adminFundingDecide(r.id, action, reason); load(); } catch (e) { alert(e.message); } finally { setBusy(null); }
+  };
+  return (
+    <Reveal>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        {[["pending", "⏳ Pending"], ["approved", "✓ Approved"], ["rejected", "✕ Rejected"], ["all", "All"]].map(([k, l]) => (
+          <button key={k} className={"chip-toggle" + (filter === k ? " active" : "")} onClick={() => setFilter(k)}>{l}</button>
+        ))}
+      </div>
+      <p style={{ color: "var(--muted)", fontSize: 13, marginBottom: 14 }}>
+        Payment verification is manual: approving a deposit credits the user's paper wallet on their next funding-page load (with notification + email); rejecting a withdrawal refunds their held funds automatically. No real money is ever involved.
+      </p>
+      {!list ? <div className="spinner" /> : (
+        <div className="table-wrap">
+          <table className="data" style={{ minWidth: 900 }}>
+            <thead><tr><th>Request</th><th>User</th><th>Type</th><th>Asset</th><th className="num">Amount</th><th>Submitted</th><th>Status</th><th className="num">Decision</th></tr></thead>
+            <tbody>
+              {list.length === 0 && <tr><td colSpan={8} style={{ textAlign: "center", color: "var(--muted)", padding: 24 }}>No {filter === "all" ? "" : filter + " "}funding requests.</td></tr>}
+              {list.map((r) => (
+                <tr key={r.id}>
+                  <td className="tnum"><b>{r.id}</b></td>
+                  <td><b>{r.name}</b><br /><small style={{ color: "var(--muted)" }}>{r.email}</small></td>
+                  <td><span className={"badge " + (r.type === "deposit" ? "badge-pop" : "badge-hot")}>{r.type === "deposit" ? "↓ deposit" : "↑ withdraw"}</span></td>
+                  <td><b>{r.assetLabel || r.asset}</b></td>
+                  <td className="num tnum">{Number(r.amount).toLocaleString("en-US", { maximumFractionDigits: 6 })}</td>
+                  <td className="tnum" style={{ fontSize: 12.5 }}>{new Date(r.createdAt).toLocaleString()}</td>
+                  <td>
+                    <span className={"badge " + (r.status === "approved" ? "badge-pop" : r.status === "rejected" ? "badge-hot" : "badge-new")}>{r.status}</span>
+                    {r.status !== "pending" && <><br /><small style={{ color: "var(--muted)" }}>{r.decidedBy} · {new Date(r.decidedAt).toLocaleDateString()}</small>{r.reason && <><br /><small style={{ color: "var(--down)" }}>{r.reason}</small></>}</>}
+                  </td>
+                  <td className="num" style={{ whiteSpace: "nowrap" }}>
+                    {r.status === "pending" ? (
+                      <>
+                        <button className="cancel-btn" style={{ color: "var(--accent)", marginRight: 8 }} disabled={busy === r.id} onClick={() => decide(r, "approve")}>✓ Approve</button>
+                        <input value={reasons[r.id] || ""} onChange={(e) => setReasons((s) => ({ ...s, [r.id]: e.target.value }))} placeholder="Rejection reason…"
+                          style={{ width: 150, padding: "6px 9px", fontSize: 12, borderRadius: 8, border: "1px solid var(--line)", background: "var(--bg-elev)", color: "var(--text)", marginRight: 8 }} />
+                        <button className="cancel-btn" style={{ color: "var(--down)" }} disabled={busy === r.id} onClick={() => decide(r, "reject")}>✕ Reject</button>
+                      </>
+                    ) : <span style={{ color: "var(--faint)", fontSize: 12 }}>decided</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Reveal>
+  );
+}
+
 function Users() {
   const { user: me } = useApp();
   const [users, setUsers] = useState(null);
@@ -355,6 +418,7 @@ export default function Admin() {
         {tab === "overview" && <Overview stats={stats} />}
         {tab === "composer" && <Composer />}
         {tab === "tickets" && <Tickets />}
+        {tab === "funding" && <FundingAdmin />}
         {tab === "users" && <Users />}
         {tab === "announce" && <Announce />}
         {tab === "outbox" && <Outbox />}

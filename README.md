@@ -49,8 +49,8 @@ See `.env.example`. Key variables:
 - **KYC** — automated rule validation (name/DOB/age/address/ID type/number/document image checks) with explicit rejection reasons and resubmission.
 - **Notifications** — per-channel email settings (security / trades / alerts / product), in-app bell feed, trading-event forwarding, honest outbox with `queued | sending | sent | failed`.
 - **Support** — tickets that are real conversations (user ↔ admin), status workflow, forced branded email on replies.
-- **Funding** — virtual deposits/withdrawals across fiat wallets & top-50 coins with a full movement ledger.
-- **Admin (`/admin`, stealth 404 for non-admins)** — stats, email composer with live branded-template preview & broadcasts, ticket inbox, user suspension/roles, site announcement manager, global outbox with resend.
+- **Funding** — virtual deposits/withdrawals across fiat wallets & top-50 coins. Every request is **verified manually by an admin** before funds move: deposits credit on approval; withdrawals hold funds immediately and auto-refund on rejection. Decisions fire in-app notifications + branded emails. Payment mechanics are unchanged — the wallet is virtual, no real money or payment processor is involved.
+- **Admin (`/admin`, stealth 404 for non-admins)** — stats, email composer with live branded-template preview & broadcasts, ticket inbox, **funding verification queue (approve/reject with mandatory reason)**, user suspension/roles, site announcement manager, global outbox with resend.
 - **Privacy rights** — JSON data export and password-confirmed account deletion.
 - **UX** — bright vivid light theme (default) + dark theme, fully responsive (desktop → 320px), cinematic generated artwork plus a canvas "living image" hero animated by live prices, code-split routes, error boundary, per-route titles, reduced-motion & focus-visible support.
 
@@ -63,6 +63,8 @@ GET|PATCH /api/me · GET /api/me/export · DELETE /api/me
 GET|POST /api/kyc
 GET /api/notifications · PATCH /api/notifications/settings · POST /api/notifications/{read,event,test}
 POST /api/support · GET /api/support/mine · POST /api/support/:id/reply
+POST /api/funding/request · GET /api/funding/mine
+GET /api/admin/funding?status= · POST /api/admin/funding/:id/decide {action: approve|reject, reason}
 GET /api/config
 GET /api/admin/{stats,users,tickets,outbox} · POST /api/admin/{email}
 POST /api/admin/{tickets/:id/reply,tickets/:id/status,outbox/:id/resend,users/:id/role,users/:id/suspend}

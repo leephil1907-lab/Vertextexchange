@@ -95,6 +95,24 @@ if (admLogin.status === 200 && admLogin.body.token) {
   ok("admin outbox", ob.status === 200 && Array.isArray(ob.body.outbox));
   const ar = await call(`/api/admin/tickets/${tk.body.id}/reply`, { text: "Support answer to smoke ticket." }, at);
   ok("admin ticket reply", ar.status === 200 && ar.body.ticket.status === "answered");
+
+  /* ----- funding: manual admin verification flow ----- */
+  const fr = await call("/api/funding/request", { type: "deposit", asset: "EUR", assetLabel: "EUR", amount: 250 }, tok);
+  ok("funding request created (pending)", fr.status === 201 && fr.body.request.status === "pending");
+  const badFr = await call("/api/funding/request", { type: "deposit", asset: "EUR", amount: -5 }, tok);
+  ok("funding rejects invalid amount", badFr.status === 400);
+  const noReason = await call(`/api/admin/funding/${fr.body.request.id}/decide`, { action: "reject" }, at);
+  ok("reject requires a reason", noReason.status === 400);
+  const fl = await call("/api/admin/funding?status=pending", undefined, at);
+  ok("admin funding list", fl.status === 200 && fl.body.requests.some((r) => r.id === fr.body.request.id));
+  const ap = await call(`/api/admin/funding/${fr.body.request.id}/decide`, { action: "approve" }, at);
+  ok("admin approves deposit", ap.status === 200 && ap.body.request.status === "approved");
+  const twice = await call(`/api/admin/funding/${fr.body.request.id}/decide`, { action: "reject", reason: "x" }, at);
+  ok("decided request is immutable", twice.status === 400);
+  const mine = await call("/api/funding/mine", undefined, tok);
+  ok("user sees approved request", mine.status === 200 && mine.body.requests.some((r) => r.id === fr.body.request.id && r.status === "approved"));
+  const userPeek = await call("/api/admin/funding", undefined, tok);
+  ok("funding admin list is admin-only", userPeek.status === 403);
 } else {
   console.log("  (admin login skipped — set ADMIN_EMAIL/ADMIN_PASSWORD env to include)");
 }
