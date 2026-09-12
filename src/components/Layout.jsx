@@ -94,9 +94,13 @@ const MENU = [
 ];
 
 function CornerMenu() {
+  const { user } = useApp();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const loc = useLocation();
+  const menu = MENU.map((col) => (col.h === "Account" && !user
+    ? { ...col, links: [["Log In", "/login", "Access your account"], ["Sign Up", "/signup", "Create a free account"], ...col.links] }
+    : col));
   useEffect(() => setOpen(false), [loc.pathname]);
   useEffect(() => {
     const h = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
@@ -104,7 +108,7 @@ function CornerMenu() {
     return () => document.removeEventListener("click", h);
   }, []);
   return (
-    <div ref={wrapRef} style={{ position: "relative" }}>
+    <div ref={wrapRef}>
       <button className={"menu-btn" + (open ? " open" : "")} onClick={() => setOpen(!open)} aria-label="Menu" aria-expanded={open}>
         <span /><span /><span />
       </button>
@@ -112,7 +116,7 @@ function CornerMenu() {
         {open && (
           <motion.div className="menu-panel" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ type: "spring", stiffness: 380, damping: 34 }}>
             <div className="menu-grid">
-              {MENU.map((col, i) => (
+              {menu.map((col, i) => (
                 <motion.div className="menu-col" key={col.h} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.04 }}>
                   <h5>{col.h}</h5>
                   {col.links.map(([t, to, d]) => (
