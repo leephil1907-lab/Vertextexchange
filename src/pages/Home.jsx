@@ -132,33 +132,52 @@ function MoversRail() {
   );
 }
 
-/* ---------- designed terminal mock ---------- */
-function TermMock() {
+/* ---------- live top-markets snapshot (real CoinGecko data, terminal-styled) ---------- */
+function LiveSnap({ compact = false }) {
   const { fiat } = useApp();
-  const px = priceStore.price("bitcoin");
-  const rows = [
-    ["sell", 0.94], ["sell", 0.72], ["sell", 0.55], ["buy", 0.81], ["buy", 0.63], ["buy", 0.42],
-  ];
+  const [rows, setRows] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    const load = () => getMarkets(CURRENCIES[fiat].vs, 1, 100).then((r) => {
+      if (!alive || !Array.isArray(r.data)) return;
+      setRows(r.data.slice(0, compact ? 5 : 6));
+    }).catch(() => { });
+    load();
+    const t = setInterval(load, 60000);
+    return () => { alive = false; clearInterval(t); }
+  }, [fiat, compact]);
   return (
-    <div className="term-mock" aria-hidden="true">
-      <div className="tm-head"><span className="tm-pair">BTC/{fiat}</span><span className="tm-live"><i />LIVE</span></div>
-      <div className="tm-px tnum">{px != null ? fmtMoney(px, fiat) : "…"}</div>
-      <div className="tm-btns"><span className="buy">Buy</span><span className="sell">Sell</span></div>
-      <div className="tm-book">
-        {rows.map(([side, w], i) => (
-          <div className={"tm-row " + side} key={i}>
-            <span className="tnum">{px != null ? fmtMoney(px * (1 + (side === "sell" ? 1 : -1) * (0.0004 * (i % 3 + 1))), fiat) : "—"}</span>
-            <span className="tm-bar" style={{ width: (w * 100).toFixed(0) + "%" }} />
-            <span className="tnum">{(0.02 + w * 0.4).toFixed(4)}</span>
+    <div className="snap-panel" aria-label={"Live top markets in " + fiat}>
+      <div className="tm-head"><span className="tm-pair">Top markets</span><span className="tm-live"><i />LIVE · {fiat.toUpperCase()}</span></div>
+      {!rows && [...Array(compact ? 5 : 6)].map((_, i) => <div key={i} className="skeleton" style={{ height: 34, borderRadius: 8, marginBottom: 6 }} />)}
+      {rows?.map((c) => {
+        const chg = c.price_change_percentage_24h ?? 0;
+        return (
+          <div className="snap-row" key={c.id}>
+            <img src={c.image} alt="" loading="lazy" />
+            <div className="snap-id"><b>{c.symbol.toUpperCase()}</b><small>{c.name}</small></div>
+            <Sparkline data={c.sparkline_in_7d?.price} up={chg >= 0} width={64} height={26} />
+            <div className="snap-px">
+              <b className="tnum">{fmtMoney(c.current_price, fiat)}</b>
+              <small className={"tnum " + (chg >= 0 ? "up" : "down")}>{chg >= 0 ? "+" : ""}{chg.toFixed(2)}%</small>
+            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
 
 /* ================= animated hero carousel ================= */
 const EASE = [0.21, 0.65, 0.36, 1];
+
+/* cursor-tracking spotlight — CSS vars only, no re-renders (60fps) */
+function spot(e) {
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%");
+  el.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%");
+}
 const slideV = (reduced) => ({
   enter: (d) => ({ opacity: 0, x: reduced ? 0 : d * 72 }),
   center: { opacity: 1, x: 0, transition: { duration: 0.5, ease: EASE, staggerChildren: 0.07, delayChildren: 0.12 } },
@@ -242,7 +261,7 @@ function HeroCarousel({ user, fiat, pills }) {
       </>,
       visual: (
         <div className="hc-visual" style={{ display: "flex", flexDirection: "column", border: "1px solid var(--line)", background: "var(--bg-elev)", padding: 16 }}>
-          <TermMock />
+          <LiveSnap />
         </div>
       ),
     },
@@ -405,7 +424,8 @@ export default function Home() {
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.t}
-                className="card feat-card"
+                className="card feat-card spot-card"
+                onMouseMove={spot}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
@@ -437,13 +457,13 @@ export default function Home() {
         <div className="container">
           <SectionHead kicker="The platform" title="Everything works. Nothing is decorative." text="Each tile below is a live feature of this app — open the terminal and use it in seconds." />
           <div className="bento">
-            <Reveal className="bn-a">
+            <Reveal className="bn-a spot-card" onMouseMove={spot}>
               <div className="bn-kicker">Terminal</div>
               <h3>A pro terminal with real depth</h3>
               <p>Market & limit orders, resting orders plotted on the chart, live order-book style depth and instant fills at real prices.</p>
-              <TermMock />
+              <LiveSnap compact />
             </Reveal>
-            <Reveal className="bn-b" delay={0.06}>
+            <Reveal className="bn-b spot-card" onMouseMove={spot} delay={0.06}>
               <div className="bn-kicker">Futures</div>
               <h3>Isolated margin, real liquidation</h3>
               <p>1–50x leverage with live mark price, ROE and the exact liquidation formula exchanges use.</p>
@@ -453,13 +473,13 @@ export default function Home() {
               </div>
               <div className="lev-chips">{[1, 2, 3, 5, 10, 20, 50].map((l) => <span key={l}>{l}x</span>)}</div>
             </Reveal>
-            <Reveal className="bn-c" delay={0.1}>
+            <Reveal className="bn-c spot-card" onMouseMove={spot} delay={0.1}>
               <div className="bn-kicker">Automation</div>
               <h3>DCA bots</h3>
               <p>Recurring buys at live prices with optional take-profit. Watch it work, stop it anytime.</p>
               <div className="lev-chips"><span>every 1m–1d</span><span>TP %</span><span>×2–500 buys</span></div>
             </Reveal>
-            <Reveal className="bn-d" delay={0.14}>
+            <Reveal className="bn-d spot-card" onMouseMove={spot} delay={0.14}>
               <div className="bn-kicker">Alerts</div>
               <h3>Price alerts</h3>
               <p>Above/below triggers that fire live, plot on your chart and notify your account.</p>
@@ -469,7 +489,7 @@ export default function Home() {
                 <circle cx="100" cy="10" r="3.5" fill="var(--gold)" />
               </svg>
             </Reveal>
-            <Reveal className="bn-e" delay={0.08}>
+            <Reveal className="bn-e spot-card" onMouseMove={spot} delay={0.08}>
               <div className="bn-kicker">Charting</div>
               <h3>RSI & MACD panes, 6 timeframes</h3>
               <p>Candlesticks with EMA 20/50 overlays and synchronised indicator panes — 5m to 1W, on every coin.</p>
@@ -482,7 +502,7 @@ export default function Home() {
                 <path d="M0 38 C 40 36, 60 44, 100 38 S 180 30, 220 34 S 280 26, 300 30" fill="none" stroke="var(--gold)" strokeWidth="1.6" />
               </svg>
             </Reveal>
-            <Reveal className="bn-f" delay={0.12}>
+            <Reveal className="bn-f spot-card" onMouseMove={spot} delay={0.12}>
               <div className="bn-kicker">Account & security</div>
               <h3>Real protection, real privacy rights</h3>
               <p>scrypt-hashed passwords, TOTP 2FA, login history, automated KYC, notification controls, data export and account deletion.</p>
@@ -565,7 +585,7 @@ export default function Home() {
                 ? <Btn to="/dashboard" className="btn btn-cta-ghost btn-lg">My Dashboard</Btn>
                 : <Btn to="/signup" className="btn btn-cta-ghost btn-lg">Create Free Account</Btn>}
             </div>
-            <div className="cta-fine">No deposit needed to explore · Demo mode available in the terminal</div>
+            <div className="cta-fine">Free account · No deposit needed to explore live markets{!user && <> · Already trading? <Link to="/login" style={{ color: "#fff", fontWeight: 700, textDecoration: "underline" }}>Log in</Link></>}</div>
           </Reveal>
         </div>
       </Section>

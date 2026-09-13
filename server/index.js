@@ -365,7 +365,7 @@ app.post("/api/auth/signup", rateLimit("signup", 12, 10 * 60e3), (req, res) => {
   const token = newToken();
   db.sessions[token] = { userId: u.id, createdAt: Date.now() };
   logLogin(u, true, req.ip);
-  notify(u, "security", "Welcome to Vertex Trader", "Your account was created successfully. The terminal's demo mode starts with 50,000 " + u.currency + " in virtual funds so you can practise; live trading uses your verified crypto balance. Enable two-factor authentication from Dashboard → Security.");
+  notify(u, "security", "Welcome to Vertex Trader", "Your account was created successfully. Explore live markets from the terminal, fund your wallet with crypto whenever you're ready, and enable two-factor authentication from Dashboard → Security.");
   save();
   res.json({ token, user: publicUser(u) });
 });
@@ -677,12 +677,12 @@ app.post("/api/notifications/test", rateLimit("tmail", 6, 10 * 60e3), (req, res)
 /* ----- admin: stats, users, email composer, ticket conversations ----- */
 /* ============================================================
    Funding requests — deposits & withdrawals are VERIFIED MANUALLY
-   by an admin before funds move. Payments themselves are unchanged:
-   the wallet is virtual, no real money or payment processor involved.
+   by an admin before funds move. Funding is crypto-only: transfers
+   happen on-chain to the wallets configured in payment methods.
    Flow: user submits request (withdrawals reserve funds client-side)
    → admin approves/rejects (reason required to reject) → user gets
    in-app notification + branded email → client applies the credit or
-   refund to the paper wallet.
+   refund to the trading wallet.
    ============================================================ */
 app.post("/api/funding/request", rateLimit("funding", 20, 10 * 60e3), (req, res) => {
   const u = getUser(req);
@@ -763,7 +763,7 @@ app.post("/api/admin/funding/:id/decide", rateLimit("fundingdecide", 120, 10 * 6
     const label = r.type === "deposit" ? "Deposit" : "Withdrawal";
     const title = `${label} ${r.status} — ${amt}`;
     const body = r.status === "approved"
-      ? `Your ${r.type} request ${r.id} for ${amt} passed manual verification and was ${r.type === "deposit" ? "credited to your paper wallet" : "completed"}. Open the funding page to see your updated balance and history.`
+      ? `Your ${r.type} request ${r.id} for ${amt} passed manual verification and was ${r.type === "deposit" ? "credited to your wallet" : "completed"}. Open the funding page to see your updated balance and history.`
       : `Your ${r.type} request ${r.id} for ${amt} was declined during manual verification.\n\nReason: ${reason}\n\nYou can submit a corrected request any time from the funding page.`;
     ensureNotif(u);
     u.notifications.unshift({ id: crypto.randomUUID(), kind: "funding", title, body, time: Date.now(), read: false });

@@ -49,7 +49,7 @@ export function Signup() {
         <motion.div className="auth-side" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
           <div className="kicker">Create account</div>
           <h2>Start trading with <span className="grad-text">live market data</span></h2>
-          <p>Your account keeps your virtual wallet, open orders, DCA bots and performance history — on this device, tied to your login.</p>
+          <p>Your account keeps your wallet, open orders, DCA bots and performance history — tied to your login.</p>
           <ul>{BENEFITS.map((b) => <li key={b}>{b}</li>)}</ul>
         </motion.div>
         <motion.div className="form-card" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>

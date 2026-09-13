@@ -166,7 +166,7 @@ export default function Strategies() {
             ))}
           </div>
           <p style={{ textAlign: "center", color: "var(--faint)", fontSize: 12.5, marginTop: 26 }}>
-            Educational content only — not financial advice. Every strategy can lose money in real markets; that's precisely why the terminal includes a demo mode to practise in first.
+            Educational content only — not financial advice. Every strategy can lose money in real markets; that's precisely why risk management matters on every position.
           </p>
         </div>
       </Section>

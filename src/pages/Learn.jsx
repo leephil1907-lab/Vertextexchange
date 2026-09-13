@@ -37,7 +37,6 @@ const GLOSSARY = [
   ["Stop-loss", "A protective exit that caps your loss at a pre-set price level."],
   ["Drawdown", "Peak-to-trough decline of an equity curve — the true measure of how bumpy a strategy is."],
   ["ROE", "Return on equity for a futures position: unrealised P&L divided by the margin committed."],
-  ["Demo mode", "A practice session inside the terminal with separate demo funds at the same live prices — switched via the LIVE/DEMO toggle."],
 ];
 
 const TABS = Object.keys(COURSES).map((k) => ({ id: k, label: k }));

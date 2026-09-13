@@ -2,7 +2,7 @@ import { Reveal, Btn, Section, SectionHead, PageHero, CtaBand } from "../compone
 import { useApp } from "../app-context.jsx";
 
 const VALUES = [
-  { icon: "🎯", h: "Learn without burning capital", p: "Most new traders lose money in their first year — usually to leverage and emotions, not bad ideas. The terminal's demo session gives you separate practice funds at the same live prices, so those mistakes cost nothing." },
+  { icon: "🎯", h: "Learn before you size up", p: "Most new traders lose money in their first year — usually to leverage and emotions, not bad ideas. Structured courses, a strategy library and live analysis pages let you build your edge on real market data before you commit serious capital." },
   { icon: "📊", h: "Real data, always", p: "Every quote, candle, market cap and coin profile on this site comes live from CoinGecko's public API. No fabricated feeds, no invented charts. The market you trade is the market that exists." },
   { icon: "🧮", h: "Honest mechanics", p: "Fees, spread, maintenance margin and liquidation formulas are the real ones, shown before every execution. If a strategy only 'works' when costs are hidden, it doesn't work." },
   { icon: "🔓", h: "Transparency over hype", p: "No fake testimonials, no invented awards, no manufactured urgency. This page tells you exactly what we are — and what we are not." },
@@ -23,9 +23,6 @@ export default function About() {
             </p>
             <p style={{ fontSize: 16, marginBottom: 14 }}>
               <b>Funding is crypto-only and humanly verified:</b> every deposit and withdrawal is checked manually by our admin team before funds move. No card details, no bank rails, no automated payment processors — and nothing here is financial advice or a solicitation to trade.
-            </p>
-            <p style={{ fontSize: 16, marginBottom: 14 }}>
-              <b>Demo mode lives in the terminal only:</b> a LIVE/DEMO switch gives you separate practice funds at the same live prices, so you can learn the mechanics without touching your balance.
             </p>
             <p style={{ fontSize: 16, color: "var(--muted)" }}>
               Accounts, passwords, sessions, two-factor authentication and KYC verification are real, working features — they protect your wallet and your history.
@@ -61,7 +58,7 @@ export default function About() {
           </Reveal>
           <Reveal className="risk-box" delay={0.1} style={{ marginTop: 26 }}>
             <h3>Risk warning</h3>
-            <p>Cryptocurrency trading involves substantial risk and can result in the loss of your entire capital. Leveraged products amplify both gains and losses. Nothing on this platform constitutes financial advice. Practise here first — and if you ever trade with real money elsewhere, do so only with funds you can afford to lose.</p>
+            <p>Cryptocurrency trading involves substantial risk and can result in the loss of your entire capital. Leveraged products amplify both gains and losses. Nothing on this platform constitutes financial advice. Start small, manage risk on every position, and never trade with money you cannot afford to lose.</p>
           </Reveal>
         </div>
       </Section>

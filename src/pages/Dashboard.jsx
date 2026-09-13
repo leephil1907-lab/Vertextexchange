@@ -597,13 +597,13 @@ function Settings() {
             <button type="button" className={theme === "light" ? "active" : ""} onClick={() => theme !== "light" && toggleTheme()}>☀️ Light</button>
           </div>
           <label style={{ fontSize: 12.5, color: "var(--muted)", display: "block", marginBottom: 6 }}>Wallet</label>
-          <button className="btn btn-ghost" style={{ color: "var(--down)" }} onClick={() => { if (confirm("Reset wallet, orders, positions, bots and history?")) paper.reset(); }}>Reset virtual wallet</button>
+          <button className="btn btn-ghost" style={{ color: "var(--down)" }} onClick={() => { if (confirm("Reset wallet, orders, positions, bots and history?")) paper.reset(); }}>Reset wallet data</button>
         </div>
       </Reveal>
       <Reveal className="card" delay={0.12} style={{ gridColumn: "1 / -1", borderColor: "rgba(255,93,115,.35)" }}>
         <h3 style={{ color: "var(--down)" }}>Danger zone</h3>
         <p style={{ color: "var(--muted)", fontSize: 13.5, margin: "8px 0 14px" }}>
-          Export a JSON copy of everything we store about you, or permanently delete your account (profile, sessions, tickets and queued emails). Your local paper wallet stays on this device until reset.
+          Export a JSON copy of everything we store about you, or permanently delete your account (profile, sessions, tickets and queued emails). Your local wallet data stays on this device until reset.
         </p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <button className="btn btn-ghost" onClick={async () => {

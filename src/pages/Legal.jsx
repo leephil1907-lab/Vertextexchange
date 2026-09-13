@@ -67,7 +67,7 @@ export function Privacy() {
             <P>Account data is stored in the platform's server database for this deployment. Emails are delivered through SMTP only when the operator configures credentials; otherwise generated emails remain queued in your outbox (visible to you in Dashboard → Notifications) and are never transmitted.</P>
           </Block>
           <Block h="5. Local storage on your device">
-            <P>We use localStorage for: theme, display currency, guest paper wallets, chart caches (to respect CoinGecko rate limits) and guide progress. Clearing site data removes these, including guest wallets.</P>
+            <P>We use localStorage for: theme, display currency, guest trading wallets, chart caches (to respect CoinGecko rate limits) and guide progress. Clearing site data removes these, including guest wallets.</P>
           </Block>
           <Block h="6. Your rights">
             <P>You can <b>export</b> your data (Dashboard → Settings → Export my data) and <b>delete your account</b> (same page), which erases your profile, sessions, tickets and queued emails. KYC submissions can be resubmitted or removed with the account. Questions via <Link to="/support" style={{ color: "var(--accent)" }}>support</Link>.</P>

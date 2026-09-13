@@ -246,7 +246,7 @@ const INLINE_LINKS = [
 ];
 
 function Header() {
-  const { scrollY } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const [compact, setCompact] = useState(false);
   useMotionValueEvent(scrollY, "change", (v) => setCompact(v > 40));
   const loc = useLocation();
@@ -271,6 +271,7 @@ function Header() {
           <CornerMenu />
         </div>
       </div>
+      <motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }} aria-hidden="true" />
     </motion.header>
   );
 }
@@ -286,7 +287,8 @@ function Footer() {
         <div className="footer-grid">
           <div className="footer-about">
             <Link className="logo" to="/"><Logo size={28} /><span>Vertex<span className="g">Trader</span></span></Link>
-            <p>A crypto trading platform with live CoinGecko market data: spot, futures up to 50x, DCA bots and pro charting — with crypto funding verified manually by our team, and a demo mode in the terminal to practise risk-free.</p>
+            <p>A crypto trading platform with live CoinGecko market data: spot, futures up to 50x, DCA bots and pro charting — with crypto funding verified manually by our team.</p>
+            <div className="footer-status"><span className="pulse-dot" /> Live data · CoinGecko API</div>
           </div>
           {col("Trade", [["Live Terminal", "/trade"], ["Markets", "/markets"], ["Fee Schedule", "/fees"]])}
           {col("Learn", [["Getting Started Guide", "/strategies"], ["Strategy Library", "/strategies"], ["Courses & Glossary", "/learn"]])}
@@ -294,15 +296,19 @@ function Footer() {
           {col("Company", [["About & Risk", "/about"], ["Support & FAQ", "/support"], ["Share Feedback & Rate Us", "/support"], ["Trust & Transparency", "/#trust"]])}
         </div>
         <div className="risk-note">
-          <p><strong>Risk warning:</strong> Cryptocurrency trading involves substantial risk and leveraged products can lead to rapid losses, including liquidation of your full margin. Prices can be extremely volatile. Nothing on this site is financial advice. Use the terminal's demo mode to practise first and never risk money you cannot afford to lose.</p>
+          <p><strong>Risk warning:</strong> Cryptocurrency trading involves substantial risk and leveraged products can lead to rapid losses, including liquidation of your full margin. Prices can be extremely volatile. Nothing on this site is financial advice. Start small, manage risk on every position, and never risk money you cannot afford to lose.</p>
           <p><strong>Platform notice:</strong> Vertex Trader is a crypto trading platform. Market data is provided by CoinGecko's public API and may be delayed or rate-limited. Funding is crypto-only — every deposit and withdrawal is verified manually by our team before funds move. Trading involves substantial risk of loss; leveraged products can liquidate your entire margin. Nothing on this platform is financial advice.</p>
         </div>
         <div className="footer-bottom">
           <span>© 2026 Vertex Trader · Market data by <a href="https://www.coingecko.com/" target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>CoinGecko</a></span>
-          <div className="legal">
-            <Link to="/terms">Terms of Use</Link><Link to="/privacy">Privacy</Link><Link to="/fees">Fees</Link><Link to="/support">Support</Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <div className="legal">
+              <Link to="/terms">Terms of Use</Link><Link to="/privacy">Privacy</Link><Link to="/fees">Fees</Link><Link to="/support">Support</Link>
+            </div>
+            <button className="to-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Back to top" title="Back to top">↑</button>
           </div>
         </div>
+        <div className="footer-wordmark" aria-hidden="true">VERTEX TRADER</div>
       </div>
     </footer>
   );

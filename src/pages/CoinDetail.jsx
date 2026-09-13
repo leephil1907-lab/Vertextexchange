@@ -183,7 +183,7 @@ export default function CoinDetail() {
 
             <div>
               <Reveal className="card" style={{ marginBottom: 18 }}>
-                <h3>Trade {coin.symbol?.toUpperCase()} (paper)</h3>
+                <h3>Trade {coin.symbol?.toUpperCase()}</h3>
                 <p style={{ margin: "8px 0 16px" }}>Open the terminal with this market pre-selected — spot, futures and DCA with live prices.</p>
                 <Link className="btn btn-primary btn-block" to={`/trade?coin=${coin.id}`}>Launch terminal →</Link>
               </Reveal>
