@@ -35,9 +35,21 @@ which is what the local Express server uses.)
 
 ## 3. Deno Deploy checklist
 
-1. Dashboard → your project → Settings → **Entrypoint = `main.ts`** (this was the cause of the earlier HTTP 500).
-2. Redeploy after each push (automatic if connected to GitHub).
-3. Hard-refresh once after a deploy (old cached responses).
+**Preferred — automatic deploys (once):** the repo ships `.github/workflows/deno-deploy.yml`.
+1. Create an access token: https://dash.deno.com/account#api-tokens → *New Access Token*.
+2. GitHub repo → Settings → Secrets and variables → Actions → *New repository secret* →
+   name `DENO_DEPLOY_TOKEN`, paste the token.
+3. Push (or run the workflow manually: Actions → Deploy to Deno Deploy → Run workflow).
+   Every later push to `main` deploys automatically — no dashboard needed.
+
+**Manual alternative:**
+1. Dashboard → your project → Settings → **Entrypoint = `main.ts`** → Redeploy.
+   (If the project was created by drag-and-drop it serves stale static files and
+   ignores GitHub — reconnect it to the repo or use the workflow above.)
+2. Hard-refresh once after a deploy (old cached responses).
+
+`main.ts` guarantees: every navigation returns `text/html; charset=utf-8` with
+`Cache-Control: no-store` — a route can never be served (or cached) as a file download.
 
 ## 4. Verify
 

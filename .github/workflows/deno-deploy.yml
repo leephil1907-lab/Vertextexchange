@@ -1,0 +1,35 @@
+# Push-to-deploy for Deno Deploy.
+# One-time setup (2 minutes):
+#   1. Create an access token: https://dash.deno.com/account#api-tokens → "New Access Token"
+#   2. Add it to this repo: Settings → Secrets and variables → Actions →
+#      New repository secret → name: DENO_DEPLOY_TOKEN → paste the token.
+#   3. If your Deno Deploy project name differs from "vertextexchange"
+#      (see https://dash.deno.com — the project name, not the URL suffix),
+#      change `project:` below.
+# After that, every push to main deploys main.ts + dist automatically.
+
+name: Deploy to Deno Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: verttextexchange
+          entrypoint: main.ts
+          exclude: node_modules,.github,docs,scripts
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
