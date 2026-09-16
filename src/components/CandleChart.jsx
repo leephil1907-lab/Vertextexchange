@@ -142,7 +142,8 @@ const CandleChart = forwardRef(function CandleChart(
       r.macd.sigL.setData(m.map((x) => ({ time: x.time, value: x.signal })));
       r.macd.hist.setData(m.map((x) => ({ time: x.time, value: x.hist, color: x.hist >= 0 ? "rgba(31,191,101,.55)" : "rgba(242,85,91,.55)" })));
     }
-  }, [candles, indicators]);
+    // h/theme recreate the chart instance — re-apply data afterwards
+  }, [candles, indicators, h, theme]);
 
   /* price lines (orders/alerts) */
   useImperativeHandle(ref, () => ({
@@ -160,7 +161,7 @@ const CandleChart = forwardRef(function CandleChart(
 
   useEffect(() => {
     if (ref && ref.current && ref.current.setPriceLines) ref.current.setPriceLines(priceLines);
-  }, [priceLines]);
+  }, [priceLines, h, theme]);
 
   return (
     <div>

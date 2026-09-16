@@ -261,18 +261,18 @@ class PaperEngine {
   /* ---------- spot ---------- */
   placeSpotOrder({ coinId, side, mode, qty, price }) {
     qty = Number(qty);
-    if (!qty || qty <= 0) return this.toast("Enter a valid amount.", true);
+    if (!qty || qty <= 0) { this.toast("Enter a valid amount.", true); return false; }
     const mid = this.price(coinId);
-    if (mid == null) return this.toast("Waiting for live price data…", true);
+    if (mid == null) { this.toast("Waiting for live price data…", true); return false; }
     const fiat = this.state.fiat;
     const px = mode === "limit" ? Number(price) : this.execPrice(coinId, side);
-    if (!px || px <= 0) return this.toast("Enter a valid limit price.", true);
+    if (!px || px <= 0) { this.toast("Enter a valid limit price.", true); return false; }
     const cost = qty * px;
     const fee = cost * SPOT_FEE;
     const id = this.state.nextId++;
 
     if (side === "buy") {
-      if (this.fiatBal() < cost + fee) return this.toast(`Insufficient ${fiat} — need ${(cost + fee).toFixed(2)}, have ${this.fiatBal().toFixed(2)}.`, true);
+      if (this.fiatBal() < cost + fee) { this.toast(`Insufficient ${fiat} — need ${(cost + fee).toFixed(2)}, have ${this.fiatBal().toFixed(2)}.`, true); return false; }
       this.state.balances.fiat[fiat] -= cost + fee;
       if (mode === "market") {
         this.settleSpot({ id, coinId, fiat, side, qty }, px, "market");
@@ -281,7 +281,7 @@ class PaperEngine {
         this.toast(`Limit BUY placed @ ${px.toPrecision(6)} ${fiat} — funds reserved.`);
       }
     } else {
-      if (this.coinBal(coinId) < qty) return this.toast(`Insufficient ${this.meta(coinId).symbol} — have ${this.coinBal(coinId).toPrecision(6)}.`, true);
+      if (this.coinBal(coinId) < qty) { this.toast(`Insufficient ${this.meta(coinId).symbol} — have ${this.coinBal(coinId).toPrecision(6)}.`, true); return false; }
       this.subCoin(coinId, qty);
       if (mode === "market") {
         this.settleSpot({ id, coinId, fiat, side, qty }, px, "market");
@@ -292,6 +292,7 @@ class PaperEngine {
     }
     this.save();
     this.emit();
+    return true;
   }
 
   cancelOrder(id) {
@@ -309,7 +310,7 @@ class PaperEngine {
   swap(from, to, amt) {
     // from/to are asset codes: fiat code or coinId
     amt = Number(amt);
-    if (!amt || amt <= 0) return this.toast("Enter an amount to swap.", true);
+    if (!amt || amt <= 0) { this.toast("Enter an amount to swap.", true); return false; }
     const isFiat = (a) => !!CURRENCIES[a];
     const val = (a) => (isFiat(a) ? (a === from ? amt : 0) : 0);
     void val;
@@ -321,9 +322,9 @@ class PaperEngine {
       return this.price(a);
     };
     const fromV = unitValue(from), toV = unitValue(to);
-    if (fromV == null || toV == null) return this.toast("Waiting for live price data…", true);
+    if (fromV == null || toV == null) { this.toast("Waiting for live price data…", true); return false; }
     const have = isFiat(from) ? (this.state.balances.fiat[from] || 0) : this.coinBal(from);
-    if (have < amt) return this.toast(`Insufficient ${isFiat(from) ? from : this.meta(from).symbol} — have ${Number(have).toPrecision(6)}.`, true);
+    if (have < amt) { this.toast(`Insufficient ${isFiat(from) ? from : this.meta(from).symbol} — have ${Number(have).toPrecision(6)}.`, true); return false; }
     const recvGross = (amt * fromV) / toV;
     const recv = recvGross * (1 - SPOT_FEE);
     if (isFiat(from)) this.state.balances.fiat[from] -= amt; else this.subCoin(from, amt);
@@ -334,18 +335,19 @@ class PaperEngine {
     this.save();
     this.snapshotEquity(true);
     this.emit();
+    return true;
   }
 
   /* ---------- futures ---------- */
   openPosition({ coinId, side, margin, leverage }) {
     margin = Number(margin); leverage = Number(leverage);
-    if (!margin || margin <= 0) return this.toast("Enter your margin amount.", true);
-    if (![1, 2, 3, 5, 10, 20, 50].includes(leverage)) return this.toast("Choose a valid leverage.", true);
-    if (this.fiatBal() < margin) return this.toast(`Insufficient ${this.state.fiat} for margin.`, true);
+    if (!margin || margin <= 0) { this.toast("Enter your margin amount.", true); return false; }
+    if (![1, 2, 3, 5, 10, 20, 50].includes(leverage)) { this.toast("Choose a valid leverage.", true); return false; }
+    if (this.fiatBal() < margin) { this.toast(`Insufficient ${this.state.fiat} for margin.`, true); return false; }
     const px = this.execPrice(coinId, side);
-    if (px == null) return this.toast("Waiting for live price data…", true);
+    if (px == null) { this.toast("Waiting for live price data…", true); return false; }
     const openFee = margin * leverage * FUTURES_FEE;
-    if (this.fiatBal() < margin + openFee) return this.toast(`Margin + opening fee exceeds balance.`, true);
+    if (this.fiatBal() < margin + openFee) { this.toast(`Margin + opening fee exceeds balance.`, true); return false; }
     this.state.balances.fiat[this.state.fiat] -= margin + openFee;
     const notional = margin * leverage;
     const qty = notional / px;
@@ -360,6 +362,7 @@ class PaperEngine {
     this.toast(`${side.toUpperCase()} opened · ${qty.toPrecision(5)} ${this.meta(coinId).symbol} @ ${px.toPrecision(6)} · ${leverage}x · liq ≈ ${liqPrice.toPrecision(6)}`);
     this.save();
     this.emit();
+    return true;
   }
 
   closePosition(id) {

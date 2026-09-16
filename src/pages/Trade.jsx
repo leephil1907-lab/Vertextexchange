@@ -64,8 +64,25 @@ export default function Trade() {
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [alertDir, setAlertDir] = useState("above");
   const [alertPx, setAlertPx] = useState("");
+  const [chartFs, setChartFs] = useState(false);
+  const [execPulse, setExecPulse] = useState(null); // { tab, label } — ✓ executed feedback
   const [, force] = useState(0);
   const chartRef = useRef(null);
+  const pulseT = useRef(0);
+
+  // fullscreen chart: Esc closes
+  useEffect(() => {
+    if (!chartFs) return;
+    const onKey = (e) => { if (e.key === "Escape") setChartFs(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [chartFs]);
+
+  const pulse = (tab, label) => {
+    setExecPulse({ tab, label });
+    clearTimeout(pulseT.current);
+    pulseT.current = setTimeout(() => setExecPulse(null), 1500);
+  };
 
   // spot form
   const [side, setSide] = useState("buy");
@@ -164,7 +181,12 @@ export default function Trade() {
   const assetLabel = (a) => (CURRENCIES[a] ? a : paper.meta(a).symbol || a.toUpperCase());
   const assetBal = (a) => (CURRENCIES[a] ? st.balances.fiat[a] || 0 : paper.coinBal(a));
 
-  const submitSpot = () => { paper.placeSpotOrder({ coinId, side, mode, qty, price }); setQty(""); setPct(0); };
+  const submitSpot = () => {
+    const ok = paper.placeSpotOrder({ coinId, side, mode, qty, price });
+    if (!ok) return;
+    pulse("spot", mode === "market" ? "✓ ORDER EXECUTED" : "✓ LIMIT ORDER PLACED");
+    setQty(""); setPct(0);
+  };
   const onSlider = (v) => {
     setPct(v);
     const p = refPx || 0;
@@ -237,9 +259,9 @@ export default function Trade() {
 
         <div className="term-grid" onClick={() => menuOpen && setMenuOpen(false)}>
           {/* chart */}
-          <div className="panel panel-chart">
+          <div className={"panel panel-chart" + (chartFs ? " chart-fs" : "")}>
             <div className="panel-head" style={{ flexWrap: "wrap", gap: 8 }}>
-              <h3>{sym}/{fiat} · real candles</h3>
+              <h3>{sym}/{fiat} · real candles{chartFs && <small style={{ color: "var(--muted)", fontWeight: 600, fontSize: 11, marginLeft: 8 }}>fullscreen · Esc to exit</small>}</h3>
               <div className="tf-group">
                 {TIMEFRAMES.map((t) => <button key={t.id} className={tf === t.id ? "active" : ""} onClick={() => setTf(t.id)}>{t.label}</button>)}
                 <span style={{ width: 1, height: 16, background: "var(--line)", margin: "0 4px" }} />
@@ -247,6 +269,8 @@ export default function Trade() {
                   <button key={k} className={"ind-btn" + (inds[k] ? " on" : "")} onClick={() => setInds((s) => ({ ...s, [k]: !s[k] }))}>{l}</button>
                 ))}
                 <button className={"ind-btn" + (alertsOpen ? " on" : "")} onClick={() => setAlertsOpen(!alertsOpen)}>🔔</button>
+                <button className={"ind-btn" + (chartFs ? " on" : "")} onClick={() => setChartFs((v) => !v)}
+                  title={chartFs ? "Exit fullscreen (Esc)" : "Fullscreen chart"} aria-label="Toggle fullscreen chart">{chartFs ? "🗗" : "⛶"}</button>
               </div>
             </div>
             <AnimatePresence>
@@ -271,7 +295,7 @@ export default function Trade() {
             </AnimatePresence>
             {chartState === "error"
               ? <div className="empty-state" style={{ padding: 90 }}>Chart feed unavailable (CoinGecko rate limit). The order panel still works with live prices — retry the chart shortly.</div>
-              : <CandleChart ref={chartRef} candles={candles} theme={theme} height={400} indicators={inds} />}
+              : <CandleChart ref={chartRef} candles={candles} theme={theme} height={chartFs ? Math.max(340, (typeof window !== "undefined" ? window.innerHeight : 900) - 250) : 400} indicators={inds} />}
           </div>
 
           {/* market info column */}
@@ -344,8 +368,8 @@ export default function Trade() {
                   <div><span>Fee (0.10%)</span><b>{fmtMoney(total * SPOT_FEE, fiat)}</b></div>
                   <div><span>Total</span><b>{fmtMoney(total + (side === "buy" ? total * SPOT_FEE : -total * SPOT_FEE), fiat)}</b></div>
                 </div>
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} className={"btn btn-block btn-lg " + (side === "buy" ? "btn-buy" : "btn-sell")} onClick={submitSpot} disabled={px == null}>
-                  {px == null ? "Waiting for live price…" : `${side === "buy" ? "Buy" : "Sell"} ${sym}`}
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} className={"btn btn-block btn-lg " + (side === "buy" ? "btn-buy" : "btn-sell") + (execPulse?.tab === "spot" ? " btn-executed" : "")} onClick={submitSpot} disabled={px == null}>
+                  {execPulse?.tab === "spot" ? execPulse.label : px == null ? "Waiting for live price…" : `${side === "buy" ? "Buy" : "Sell"} ${sym}`}
                 </motion.button>
                 <p style={{ color: "var(--faint)", fontSize: 11.5, marginTop: 12, textAlign: "center" }}>Limit orders rest until the live price crosses them — plotted on the chart.</p>
               </div>
@@ -381,10 +405,15 @@ export default function Trade() {
                   <div><span>Opening fee (0.05%)</span><b>{fmtMoney(marginN * lev * FUTURES_FEE, fiat)}</b></div>
                   <div><span>Est. liquidation</span><b style={{ color: "var(--down)" }}>{futLiq ? fmtN(futLiq) : "—"}</b></div>
                 </div>
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} className={"btn btn-block btn-lg " + (fSide === "long" ? "btn-buy" : "btn-sell")}
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} className={"btn btn-block btn-lg " + (fSide === "long" ? "btn-buy" : "btn-sell") + (execPulse?.tab === "futures" ? " btn-executed" : "")}
                   disabled={px == null || !marginN}
-                  onClick={() => { paper.openPosition({ coinId, side: fSide, margin, leverage: lev }); setMargin(""); setPct(0); }}>
-                  {px == null ? "Waiting for live price…" : `Open ${fSide} · ${lev}x`}
+                  onClick={() => {
+                    const ok = paper.openPosition({ coinId, side: fSide, margin, leverage: lev });
+                    if (!ok) return;
+                    pulse("futures", "✓ POSITION OPENED");
+                    setMargin(""); setPct(0);
+                  }}>
+                  {execPulse?.tab === "futures" ? execPulse.label : px == null ? "Waiting for live price…" : `Open ${fSide} · ${lev}x`}
                 </motion.button>
                 <p className="liq-warn" style={{ marginTop: 12, textAlign: "center" }}>
                   ⚠ At {lev}x, a {(100 / lev - MMR * 100).toFixed(1)}% adverse move liquidates the full margin. Futures are the highest-risk mode — practise here first.
@@ -413,9 +442,9 @@ export default function Trade() {
                   <div><span>Rate (live)</span><b>{swapRate != null ? `1 ${assetLabel(swapFrom)} ≈ ${fmtN(swapRate)} ${assetLabel(swapTo)}` : "—"}</b></div>
                   <div><span>Route</span><b>Direct · virtual settlement</b></div>
                 </div>
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} className="btn btn-block btn-lg btn-buy"
-                  disabled={!swapRecv} onClick={() => { paper.swap(swapFrom, swapTo, swapAmt); setSwapAmt(""); }}>
-                  Swap
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} className={"btn btn-block btn-lg btn-buy" + (execPulse?.tab === "swap" ? " btn-executed" : "")}
+                  disabled={!swapRecv} onClick={() => { const ok = paper.swap(swapFrom, swapTo, swapAmt); if (!ok) return; pulse("swap", "✓ SWAP EXECUTED"); setSwapAmt(""); }}>
+                  {execPulse?.tab === "swap" ? execPulse.label : "Swap"}
                 </motion.button>
                 <p style={{ color: "var(--faint)", fontSize: 11.5, marginTop: 12, textAlign: "center" }}>Wallet-style conversion between fiat and coins at live CoinGecko rates.</p>
               </div>

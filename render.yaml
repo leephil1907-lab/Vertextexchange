@@ -1,0 +1,41 @@
+# Render Blueprint — hosts the Vertex Trader Node API (Express, server/index.js).
+# The Deno Deploy site stays as the static frontend; point it at this API with
+# VITE_API_URL (see docs/API-HOSTING.md).
+#
+# NOTE ON STORAGE: the API persists accounts/orders to server/data.json.
+# Render's free tier has an EPHEMERAL filesystem — data resets on redeploy/restart.
+# For real use attach a persistent disk (paid instance) and set DATA_DIR to its
+# mount path, or host on a VPS / Fly.io volume / Railway volume instead.
+
+services:
+  - type: web
+    name: vertex-trader-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/config
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: ADMIN_EMAIL
+        sync: false          # e.g. admin@vertextrader.app — set in dashboard
+      - key: ADMIN_PASSWORD
+        sync: false          # strong password — set in dashboard
+      - key: CORS_ORIGIN
+        sync: false          # your Deno Deploy URL, e.g. https://vertextexchange-xxxx.deno.net (or * while testing)
+      - key: APP_URL
+        sync: false          # public URL of this API (used in email links)
+      - key: SMTP_HOST
+        sync: false          # optional — without SMTP, emails queue honestly in the admin outbox
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
