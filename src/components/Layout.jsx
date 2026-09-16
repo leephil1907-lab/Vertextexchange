@@ -319,7 +319,7 @@ export function PageTransition({ children }) {
   const { pathname } = useLocation();
   return (
     <AnimatePresence mode="wait" initial={false}>
-      <motion.main key={pathname} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.28, ease: [0.21, 0.65, 0.36, 1] }}>
+      <motion.main key={pathname} initial={{ opacity: 0, y: 14, scale: 0.992 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.985 }} transition={{ duration: 0.3, ease: [0.21, 0.65, 0.36, 1] }}>
         {children}
       </motion.main>
     </AnimatePresence>
@@ -352,6 +352,7 @@ export default function Layout({ children }) {
   return (
     <>
       <div className="aurora" />
+      <div className="bg-grid" aria-hidden="true" />
       <Announcement />
       <Ticker />
       <Header />
