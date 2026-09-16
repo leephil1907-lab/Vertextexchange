@@ -6,6 +6,7 @@ import { useApp } from "../app-context.jsx";
 import { api } from "../services/api.js";
 import { paper } from "../engine/paper.js";
 import { priceStore, getMarkets, CURRENCIES, fmtMoney } from "../services/coingecko.js";
+import CoinIcon from "../components/CoinIcon.jsx";
 
 const TABS = [
   ["overview", "📊 Overview"],
@@ -166,7 +167,7 @@ function Portfolio() {
               const m = paper.meta(id);
               return (
                 <tr key={id}>
-                  <td className="coin-id">{m.image && <img src={m.image} alt="" style={{ width: 22, height: 22 }} />}<b>{m.symbol}</b> <span style={{ color: "var(--muted)", fontWeight: 400 }}>{m.name || id}</span></td>
+                  <td className="coin-id"><CoinIcon src={m.image} symbol={m.symbol} size={22} /><b>{m.symbol}</b> <span style={{ color: "var(--muted)", fontWeight: 400 }}>{m.name || id}</span></td>
                   <td className="num tnum">{q.toPrecision(6)}</td>
                   <td className="num tnum">{px ? fmtMoney(px, fiat) : "—"}</td>
                   <td className="num tnum">{v.toFixed(2)}</td>

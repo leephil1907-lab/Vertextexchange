@@ -114,7 +114,7 @@ function ComposerPreview({ subject, body, ctaLabel }) {
   ));
   return (
     <div style={{ background: "#070b14", padding: "24px 14px" }}>
-      <div style={{ maxWidth: 560, margin: "0 auto", borderRadius: 16, overflow: "hidden", border: "1px solid #1d2b47", background: "#0b1120" }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", borderRadius: 18, overflow: "hidden", border: "1px solid #1d2b47", background: "#0b1120" }}>
         <div style={{ background: "#0d1526", borderBottom: "1px solid #1d2b47", padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}><span style={{ color: "#43DDE6" }}>▲</span> VERTEX<span style={{ color: "#4f8cff" }}>TRADER</span></span>
           <span style={{ fontSize: 10, color: "#6b7a94", letterSpacing: ".08em", textTransform: "uppercase" }}>Live market data · verified crypto funding</span>
@@ -224,7 +224,7 @@ function PaymentMethods() {
   };
   const toggle = async (m) => { try { const r = await api.adminUpdatePaymentMethod(m.id, { enabled: !m.enabled }); setList(r.paymentMethods); } catch (e) { alert(e.message); } };
   const del = async (m) => { if (!confirm(`Delete ${m.symbol} · ${m.network}?`)) return; try { const r = await api.adminDeletePaymentMethod(m.id); setList(r.paymentMethods); } catch (e) { alert(e.message); } };
-  const inp = { width: "100%", padding: "9px 11px", fontSize: 13, borderRadius: 9, border: "1px solid var(--line)", background: "var(--bg-elev)", color: "var(--text)" };
+  const inp = { width: "100%", padding: "9px 11px", fontSize: 13, borderRadius: 10, border: "1px solid var(--line)", background: "var(--bg-elev)", color: "var(--text)" };
 
   return (
     <div className="card" style={{ padding: 18, marginBottom: 22 }}>
@@ -451,7 +451,7 @@ function Announce() {
         <h3 style={{ marginBottom: 12 }}>Live preview</h3>
         {form.enabled === false ? <div className="empty-state">Bar is hidden site-wide.</div> : (
           <div className="announce" style={{ position: "relative", borderRadius: 10 }}>
-            <span>{form.text}{form.link && form.linkLabel && <> · <a href={form.link} onClick={(e) => e.preventDefault()} style={{ color: "var(--accent)" }}>{form.linkLabel}</a>}</>}</span>
+            <span>{form.text}{form.link && form.linkLabel && <> · <a href={form.link} onClick={(e) => e.preventDefault()} style={{ color: "var(--accent)" }}>{form.linkLabel}</a></>}</span>
           </div>
         )}
         <p style={{ color: "var(--faint)", fontSize: 12, marginTop: 14 }}>Current live config: {cfg ? (cfg.enabled === false ? "hidden" : "visible") : "…"} · visitors can dismiss per session.</p>

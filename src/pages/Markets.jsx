@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Reveal, Section, PageHero } from "../components/ui.jsx";
 import { useApp } from "../app-context.jsx";
 import { getMarkets, getGlobal, CURRENCIES, fmtMoney } from "../services/coingecko.js";
 import Sparkline from "../components/Sparkline.jsx";
+import CoinIcon from "../components/CoinIcon.jsx";
 
 const SORTS = {
   rank: (a, b) => a.market_cap_rank - b.market_cap_rank,
@@ -134,7 +135,7 @@ export default function Markets() {
                       <td className="tnum" style={{ color: "var(--muted)" }}>{c.market_cap_rank}</td>
                       <td>
                         <Link to={`/coin/${c.id}`} className="coin-id">
-                          <img src={c.image} alt="" loading="lazy" />
+                          <CoinIcon src={c.image} symbol={c.symbol} size={26} />
                           <span><b>{c.name}</b><small>{c.symbol}</small></span>
                         </Link>
                       </td>

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Reveal, Section, Btn } from "../components/ui.jsx";
 import CandleChart from "../components/CandleChart.jsx";
 import { useApp } from "../app-context.jsx";
 import { getCoin, CURRENCIES, fmtMoney, priceStore } from "../services/coingecko.js";
 import { fetchCandles, TIMEFRAMES, applyLivePrice } from "../services/candles.js";
 import { paper } from "../engine/paper.js";
+import CoinIcon from "../components/CoinIcon.jsx";
 
 function stripHtml(html) {
   const div = document.createElement("div");
@@ -109,7 +110,7 @@ export default function CoinDetail() {
             <Link to="/">Home</Link> / <Link to="/markets">Markets</Link> / {coin.name}
           </div>
           <Reveal style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", marginBottom: 22 }}>
-            <img src={coin.image?.large} alt="" style={{ width: 46, height: 46, borderRadius: "50%" }} />
+            <CoinIcon src={coin.image?.large} symbol={coin.symbol} size={46} />
             <div>
               <h1 style={{ fontSize: 28, letterSpacing: "-.02em" }}>{coin.name} <span style={{ color: "var(--muted)", fontSize: 16, fontWeight: 600 }}>{coin.symbol?.toUpperCase()} · Rank #{coin.market_cap_rank ?? "—"}</span></h1>
             </div>

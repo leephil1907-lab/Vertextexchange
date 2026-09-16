@@ -222,8 +222,9 @@ function ensureAdmin() {
 }
 const requireAdmin = (req, res, next) => {
   const u = getUser(req);
-  if (!u) return res.status(401).json({ error: "Not authenticated." });
-  if (u.role !== "admin") return res.status(403).json({ error: "Admin access required." });
+  // stealth: unauthenticated and non-admin callers both get an identical 404,
+  // so admin endpoints are indistinguishable from routes that don't exist.
+  if (!u || u.role !== "admin") return res.status(404).json({ error: "Not found." });
   req.admin = u;
   next();
 };

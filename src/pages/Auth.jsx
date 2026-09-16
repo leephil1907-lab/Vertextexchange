@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Section } from "../components/ui.jsx";
 import { useApp } from "../app-context.jsx";
 import { api } from "../services/api.js";

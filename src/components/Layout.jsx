@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import { useApp } from "../app-context.jsx";
 import { api } from "../services/api.js";
 import { priceStore, getMarkets, CURRENCIES, fmtMoney } from "../services/coingecko.js";
+import CoinIcon from "./CoinIcon.jsx";
 
 /* ---------- brand mark (original) ---------- */
 export function Logo({ size = 30 }) {
@@ -28,7 +29,7 @@ function Announcement() {
     <AnimatePresence initial={false}>
       {!hidden && a.enabled !== false && (
         <motion.div className="announce" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
-          <span>{a.text}{a.link && a.linkLabel && <> · <Link to={a.link}>{a.linkLabel}</Link>}</>}</span>
+          <span>{a.text}{a.link && a.linkLabel && <> · <Link to={a.link}>{a.linkLabel}</Link></>}</span>
           <button className="x" aria-label="Dismiss" onClick={() => { sessionStorage.setItem("vt_announce_off", "1"); setHidden(true); }}>✕</button>
         </motion.div>
       )}
@@ -58,11 +59,12 @@ function Ticker() {
     const q = priceStore.quotes[id];
     if (!q) return null;
     const nm = names[id];
-    return { sym: nm ? nm.symbol : id.toUpperCase(), px: fmtMoney(q.price, fiat), chg: q.change24h };
+    return { sym: nm ? nm.symbol : id.toUpperCase(), img: nm?.image || null, px: fmtMoney(q.price, fiat), chg: q.change24h };
   }).filter(Boolean);
   if (!items.length) return <div className="ticker"><div className="ticker-track"><span className="tick"><span className="sym">Loading live prices…</span></span></div></div>;
   const row = items.map((t, i) => (
     <span className="tick" key={i}>
+      <CoinIcon src={t.img} symbol={t.sym} size={15} />
       <span className="sym">{t.sym}</span>
       <span className={"px tnum " + ((t.chg ?? 0) >= 0 ? "up" : "down")}>{t.px}</span>
       <span className={"chg tnum " + ((t.chg ?? 0) >= 0 ? "up" : "down")}>{(t.chg ?? 0) >= 0 ? "▲" : "▼"} {Math.abs(t.chg ?? 0).toFixed(2)}%</span>

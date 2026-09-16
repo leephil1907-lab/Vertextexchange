@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import React from "react";
 import { Routes, Route, useLocation, Link } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { AppProvider } from "./app-context.jsx";
 import Layout from "./components/Layout.jsx";
 

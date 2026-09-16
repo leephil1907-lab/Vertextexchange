@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Reveal, Section, SectionHead, PageHero, CtaBand, Btn } from "../components/ui.jsx";
 import { useApp } from "../app-context.jsx";
 

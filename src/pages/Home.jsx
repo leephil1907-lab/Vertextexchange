@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "motion/react";
 import { Link } from "react-router-dom";
 import { Reveal, Btn, SectionHead, Counter } from "../components/ui.jsx";
 import { useApp } from "../app-context.jsx";
 import { getGlobal, getMarkets, CURRENCIES, fmtMoney, priceStore } from "../services/coingecko.js";
 import Sparkline from "../components/Sparkline.jsx";
 import MarketSphere from "../components/MarketSphere.jsx";
+import CoinIcon from "../components/CoinIcon.jsx";
+import HeroChart from "../components/HeroChart.jsx";
+
+const HERO_TABS = [["bitcoin", "BTC"], ["ethereum", "ETH"], ["solana", "SOL"], ["ripple", "XRP"]];
 
 const MARQUEE = [
   "⚡ Spot & futures trading", "📈 RSI · MACD · EMA panes", "🤖 Automated DCA bots", "🔔 Live price alerts",
@@ -107,13 +111,13 @@ function MoversRail() {
     const t = setInterval(load, 60000);
     return () => { alive = false; clearInterval(t); }
   }, [vs]);
-  if (!rows) return <div className="movers-rail">{[...Array(6)].map((_, i) => <div key={i} className="skeleton" style={{ minWidth: 216, height: 168, borderRadius: 16 }} />)}</div>;
+  if (!rows) return <div className="movers-rail">{[...Array(6)].map((_, i) => <div key={i} className="skeleton" style={{ minWidth: 216, height: 168, borderRadius: 18 }} />)}</div>;
   const card = (c) => {
     const chg = c.price_change_percentage_24h ?? 0;
     return (
       <Link className="mover-card" to={`/coin/${c.id}`} key={c.id}>
         <div className="mc-head">
-          <img src={c.image} alt="" loading="lazy" />
+          <CoinIcon src={c.image} symbol={c.symbol} size={30} />
           <div style={{ minWidth: 0 }}>
             <b>{c.symbol.toUpperCase()}</b>
             <small>{c.name}</small>
@@ -136,28 +140,28 @@ function MoversRail() {
 }
 
 /* ---------- live top-markets snapshot (real data, terminal-styled) ---------- */
-function LiveSnap({ compact = false }) {
+function LiveSnap({ count = 6, bare = false }) {
   const { fiat } = useApp();
-  const [rows, setRows] = useState(null);
+  const [list, setList] = useState(null);
   useEffect(() => {
     let alive = true;
     const load = () => getMarkets(CURRENCIES[fiat].vs, 1, 100).then((r) => {
       if (!alive || !Array.isArray(r.data)) return;
-      setRows(r.data.slice(0, compact ? 5 : 6));
+      setList(r.data.slice(0, count));
     }).catch(() => { });
     load();
     const t = setInterval(load, 60000);
-    return () => { alive = false; clearInterval(t); }
-  }, [fiat, compact]);
+    return () => { alive = false; clearInterval(t); };
+  }, [fiat, count]);
   return (
     <div className="snap-panel" aria-label={"Live top markets in " + fiat}>
-      <div className="tm-head"><span className="tm-pair">Top markets</span><span className="tm-live"><i />LIVE · {fiat.toUpperCase()}</span></div>
-      {!rows && [...Array(compact ? 5 : 6)].map((_, i) => <div key={i} className="skeleton" style={{ height: 34, borderRadius: 8, marginBottom: 6 }} />)}
-      {rows?.map((c) => {
+      {!bare && <div className="tm-head"><span className="tm-pair">Top markets</span><span className="tm-live"><i />LIVE · {fiat.toUpperCase()}</span></div>}
+      {!list && [...Array(count)].map((_, i) => <div key={i} className="skeleton" style={{ height: 34, borderRadius: 8, marginBottom: 6 }} />)}
+      {list?.map((c) => {
         const chg = c.price_change_percentage_24h ?? 0;
         return (
           <div className="snap-row" key={c.id}>
-            <img src={c.image} alt="" loading="lazy" />
+            <CoinIcon src={c.image} symbol={c.symbol} size={24} />
             <div className="snap-id"><b>{c.symbol.toUpperCase()}</b><small>{c.name}</small></div>
             <Sparkline data={c.sparkline_in_7d?.price} up={chg >= 0} width={64} height={26} />
             <div className="snap-px">
@@ -168,6 +172,30 @@ function LiveSnap({ compact = false }) {
         );
       })}
     </div>
+  );
+}
+
+/* ---------- hero terminal: coin tabs + premium chart + live list ---------- */
+function HeroTerminal({ fiat }) {
+  const [tab, setTab] = useState("bitcoin");
+  return (
+    <>
+      <div className="ht-head">
+        <span className="ht-tabs" role="tablist" aria-label="Chart coin">
+          {HERO_TABS.map(([id, sym]) => (
+            <button key={id} type="button" role="tab" aria-selected={tab === id}
+              className={"ht-tab" + (tab === id ? " on" : "")} onClick={() => setTab(id)}>
+              {sym}
+              {tab === id && <motion.i className="ht-tab-u" layoutId="ht-tab-u" transition={{ type: "spring", stiffness: 520, damping: 40 }} />}
+            </button>
+          ))}
+        </span>
+        <Link to="/trade">Open terminal →</Link>
+      </div>
+      <div className="ht-sub"><span className="tm-live"><i />LIVE · {fiat.toUpperCase()} · 7D hourly</span></div>
+      <HeroChart coinId={tab} fiat={fiat} />
+      <LiveSnap count={3} bare />
+    </>
   );
 }
 
@@ -217,7 +245,7 @@ function HeroStory({ user, fiat, pills, quotes }) {
             <motion.div className="live-pills" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.34 }}>
               {pills.map((pl) => (
                 <span className="live-pill" key={pl.sym}>
-                  <span className="pulse-dot" />
+                  <CoinIcon src={pl.img} symbol={pl.sym} size={16} />
                   <b>{pl.sym}</b>
                   <span className="tnum">{pl.px}</span>
                   <span className={"tnum " + (pl.chg >= 0 ? "up" : "down")}>{pl.chg >= 0 ? "▲" : "▼"}{Math.abs(pl.chg).toFixed(2)}%</span>
@@ -228,11 +256,7 @@ function HeroStory({ user, fiat, pills, quotes }) {
         </div>
 
         <motion.div className="hero-terminal motion-frame" style={{ y: termY, opacity: termO }}>
-          <div className="ht-head">
-            <span><span className="pulse-dot" /> Terminal · live preview</span>
-            <Link to="/trade">Open terminal →</Link>
-          </div>
-          <LiveSnap compact />
+          <HeroTerminal fiat={fiat} />
         </motion.div>
 
         {cinematic && pills.map((pl, i) => (
@@ -242,7 +266,7 @@ function HeroStory({ user, fiat, pills, quotes }) {
             animate={{ y: [0, -9, 0] }}
             transition={{ duration: 6 + i * 1.4, repeat: Infinity, ease: "easeInOut" }}
           >
-            <small>{pl.sym}/{fiat}</small>
+            <span className="fc-top"><CoinIcon src={pl.img} symbol={pl.sym} size={22} /><small>{pl.sym}/{fiat}</small></span>
             <b className="tnum">{pl.px}</b>
             <span className={"tnum " + (pl.chg >= 0 ? "up" : "down")}>{pl.chg >= 0 ? "▲" : "▼"} {Math.abs(pl.chg).toFixed(2)}%</span>
           </motion.div>
@@ -269,7 +293,7 @@ function AssetCard({ c, i, p, fiat }) {
     <motion.div style={{ y, opacity: o, rotate: rot }}>
       <Link className="asset-card motion-frame light" to={`/coin/${c.id}`}>
         <div className="ac-top">
-          <span className="coin-3d"><img src={c.image} alt="" loading="lazy" /></span>
+          <span className="coin-3d"><CoinIcon src={c.image} symbol={c.symbol} size={34} /></span>
           <div style={{ minWidth: 0 }}>
             <b>{c.symbol.toUpperCase()}</b>
             <small>{c.name}</small>
@@ -431,8 +455,14 @@ function CtaScene({ user, quotes }) {
 export default function Home() {
   const { user, fiat } = useApp();
   const [, force] = useState(0);
+  const [logos, setLogos] = useState({});
   useEffect(() => {
-    getMarkets(CURRENCIES[fiat].vs, 1, 100).catch(() => { });
+    getMarkets(CURRENCIES[fiat].vs, 1, 100).then((r) => {
+      if (!Array.isArray(r?.data)) return;
+      const m = {};
+      r.data.forEach((c) => { m[c.id] = c.image; });
+      setLogos(m);
+    }).catch(() => { });
     priceStore.configure(SPHERE_IDS, CURRENCIES[fiat].vs, 15000);
     return priceStore.subscribe(() => force((v) => v + 1));
   }, [fiat]);
@@ -444,7 +474,7 @@ export default function Home() {
 
   const pills = [["bitcoin", "BTC"], ["ethereum", "ETH"], ["solana", "SOL"]].map(([id, sym]) => {
     const q = priceStore.quotes[id];
-    return { sym, px: q?.price != null ? fmtMoney(q.price, fiat) : "…", chg: q?.change24h ?? 0 };
+    return { sym, img: logos[id] || null, px: q?.price != null ? fmtMoney(q.price, fiat) : "…", chg: q?.change24h ?? 0 };
   });
 
   return (

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import CandleChart from "../components/CandleChart.jsx";
 import { useApp } from "../app-context.jsx";
 import { paper, SPOT_FEE, FUTURES_FEE, MMR } from "../engine/paper.js";
 import { getMarkets, CURRENCIES, fmtMoney, priceStore } from "../services/coingecko.js";
 import { fetchCandles, TIMEFRAMES, applyLivePrice } from "../services/candles.js";
+import CoinIcon from "../components/CoinIcon.jsx";
 
 const LEVS = [1, 2, 3, 5, 10, 20, 50];
 const fmtN = (n, p = 6) => (n == null ? "—" : Number(n).toPrecision(p));
@@ -199,7 +200,7 @@ export default function Trade() {
         <div className="panel term-top">
           <div style={{ position: "relative" }}>
             <button className="pair-btn" type="button" onClick={() => setMenuOpen(!menuOpen)}>
-              {coinRow && <img src={coinRow.image} alt="" style={{ width: 24, height: 24, borderRadius: "50%" }} />}
+              {coinRow && <CoinIcon src={coinRow.image} symbol={coinRow.symbol} size={24} />}
               {sym}/{fiat} <span className="caret">▾</span>
             </button>
             <AnimatePresence>
@@ -209,7 +210,7 @@ export default function Trade() {
                   <div style={{ maxHeight: 320, overflowY: "auto" }}>
                     {visibleCoins.map((c) => (
                       <div className="pitem" key={c.id} onClick={() => { setCoinId(c.id); setSwapTo(c.id); setMenuOpen(false); setSearch(""); setParams({ coin: c.id }); }}>
-                        <span style={{ display: "flex", alignItems: "center", gap: 9 }}><img src={c.image} alt="" style={{ width: 20, height: 20, borderRadius: "50%" }} />{c.symbol.toUpperCase()}<small style={{ color: "var(--muted)", fontWeight: 400 }}>{c.name}</small></span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 9 }}><CoinIcon src={c.image} symbol={c.symbol} size={20} />{c.symbol.toUpperCase()}<small style={{ color: "var(--muted)", fontWeight: 400 }}>{c.name}</small></span>
                         <span className="p-px tnum">{fmtMoney(c.current_price, fiat)}</span>
                       </div>
                     ))}
@@ -554,7 +555,7 @@ export default function Trade() {
                     ))}
                     {coinRows.map(([id, q]) => (
                       <tr key={id}>
-                        <td><span className="coin-id" style={{ gap: 8 }}>{paper.meta(id).image && <img src={paper.meta(id).image} alt="" style={{ width: 20, height: 20 }} />}<b>{paper.meta(id).symbol}</b></span></td>
+                        <td><span className="coin-id" style={{ gap: 8 }}><CoinIcon src={paper.meta(id).image} symbol={paper.meta(id).symbol} size={20} /><b>{paper.meta(id).symbol}</b></span></td>
                         <td className="num tnum">{fmtN(q)}</td>
                         <td className="num tnum">{(val([id, q])).toFixed(2)}</td>
                         <td className="num tnum">{total > 0 ? ((val([id, q]) / total) * 100).toFixed(1) + "%" : "—"}</td>
