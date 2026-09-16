@@ -55,7 +55,12 @@ Deno.serve(async (req: Request) => {
 
   if (pathname === "/") pathname = "/index.html";
   let data = await tryFile(pathname);
-  if (!data && !pathname.includes(".")) data = await tryFile("/index.html"); // SPA fallback
+  if (!data && !pathname.includes(".")) {
+    // SPA fallback: serve index.html AND adopt its identity so the response
+    // is text/html (not octet-stream derived from the extensionless route).
+    data = await tryFile("/index.html");
+    if (data) pathname = "/index.html";
+  }
   if (!data) return json({ error: "Not found." }, 404);
 
   const ext = pathname.slice(pathname.lastIndexOf("."));
